@@ -28,7 +28,7 @@ proj_dir_4 <- "/home/jiaozhenna/methylation/project/EM_seq/20241125_data_reanaly
 #create a blank list to store the data frame 
 current_sample_data_list <- list()
 
-# # print("read bismark output and convert format...")
+## print("read bismark output and convert format...")
 for (i_sample in meta$Sample_name) {
 
   sample_prefix <- strsplit(i_sample, "_")[[1]][1]
@@ -88,7 +88,7 @@ saveRDS(current_sample_data_list,file =paste0(results_dir,"EMobject_filter_added
 
 
 
-# ##make group for samples 
+##make group for samples 
 gp_group <- c(meta$Sample[meta$type == "gp"])
 
 
@@ -100,14 +100,9 @@ gc_group <- c(meta$Sample[meta$type == "gc"])
 
 EMobject_fs <- makeBSseqData(current_sample_data_list,c(names(current_sample_data_list)))
 
-# results_dir="/home/jiaozhenna/methylation/project/EM_seq/20241125_data_reanalysis/Call_DMR_20250207/results/DSS_results/"
 
 saveRDS(EMobject_fs,file =paste0(results_dir,"EMobject_filter_added_sample_20250213.rds")) 
 
-
-# EMobject <- readRDS("/home/jiaozhenna/methylation/project/EM_seq/analysis/DMR_analysis/data/filter_sample/EMobject_fs.rds")
-
-# EMobject_fs <- readRDS(paste0(results_dir,"EMobject_18sample_20250114.rds"))
 
 print("dml test")
 
@@ -115,41 +110,19 @@ dmlTest <- DMLtest(EMobject_fs,group1 =gp_group,group2 = gc_group,ncores=8,smoot
 
 saveRDS(dmlTest,paste0(results_dir,"dmlTest_filter_added_sample_20250213.rds"))
         
-# dmlTest=readRDS()
-
-# print("dml test no smoothing")
-# dmlTest_no_smoothing <- DMLtest(EMobject,group1 =gp_group[1:17] ,group2 = sc_group[1:21],ncores=8)
-# saveRDS(dmlTest_no_smoothing,"/home/jiaozhenna/methylation/project/EM_seq/analysis/DMR_analysis/data/filter_sample/dmlTest_no_smoothing_fs.rds")
-
 
 ##call dmr 
-
-# print("call dmr delts=0.2")
-# dmrs_1 = callDMR(dmlTest, delta=0.2, p.threshold=0.05)
-# saveRDS(dmrs_1,"/home/jiaozhenna/methylation/project/EM_seq/analysis/DMR_analysis/data/filter_sample/dmrs_fs_delta_15.rds")
 
 print("call dmr delts=0.15")
 dmrs = callDMR(dmlTest, delta=0.15, p.threshold=0.05)
 
 saveRDS(dmrs,paste0(results_dir,"callDMR_delta_015_filter_added_sample_20250213.rds"))
 
-
-
-# print("call dmr no smoothing")
-# dmrs_no_smoothing <- callDMR(dmlTest_no_smoothing, delta=0.15, p.threshold=0.05)
-# saveRDS(dmrs_no_smoothing,"/home/jiaozhenna/methylation/project/EM_seq/analysis/DMR_analysis/data/filter_sample/dmrs_no_smoothing_fs.rds")
-
-
 print("call dml")
 
 dmls = callDML(dmlTest, p.threshold=0.05)
 
 saveRDS(dmls,paste0(results_dir,"callDML_filter_added_sample_20250213.rds"))
-
-# print("call dml no smoothing")
-# dmls_no_smoothing <- callDML(dmlTest_no_smoothing, p.threshold=0.05)
-# saveRDS(dmls_no_smoothing,"/home/jiaozhenna/methylation/project/EM_seq/analysis/DMR_analysis/data/filter_sample/dmls_no_smoothing_fs.rds")
-
 
 
 print(sessionInfo())
