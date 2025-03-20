@@ -23,7 +23,7 @@ library(matrixStats)
 library(RColorBrewer)
 ```
 
-# dat and result stored
+# define the data dir
 ```{r}
 fig_dir <- "/home/jiaozhenna/methylation/project/EM_seq/analysis/technical/figure/fig2/"
 proj <- "/home/jiaozhenna/methylation/project/EM_seq/data/metadata/"
