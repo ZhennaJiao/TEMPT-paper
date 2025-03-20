@@ -1,0 +1,43 @@
+---
+title: "format_DMR_bed_file"
+author: "Zhenna Jiao"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(ggbiplot)
+library(ggplot2)
+library(corrplot)
+library(magrittr)
+library(RColorBrewer)
+library(ComplexHeatmap)
+```
+
+##Create DMR-region file.bed
+
+import the DMR and extract the top of three columns and save as bed file which contains chromosome number , stratsite and end site  
+
+```{r cars}
+res_dir="/home/jiaozhenna/methylation/project/EM_seq/20241125_data_reanalysis/Call_DMR_filter_add_sample_20250213/results/"
+added_sample_dmr_15 <- readRDS(paste0(res_dir,"callDMR_delta_015_filter_added_sample_20250213.rds"))
+
+
+write.csv(added_sample_dmr_15,paste0(res_dir,"DMR_validation_20sample_DSS_file_20250308.csv"))
+
+
+# dmr_region <- added_sample_dmr_15[,1:3]
+# write.table(dmr_region,(paste0(res_dir,"DMR_delta_015_filtered_smaple_20250213.txt")),sep = "\t", row.names = FALSE, col.names = FALSE,quote =FALSE)
+# # write.csv(dmr_15,"/home/jiaozhenna/methylation/project/EM_seq/analysis/DMR_analysis/data/filter_sample/dmrs_fs_delta_15.csv")
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
