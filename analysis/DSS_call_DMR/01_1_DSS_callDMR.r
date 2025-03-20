@@ -94,12 +94,6 @@ gp_group <- c(meta$Sample[meta$type == "gp"])
 
 gc_group <- c(meta$Sample[meta$type == "gc"])
 
-# gp_group <- c("gp22","gp23","gp24","gp26","gp29")
-# 
-# gc_group <- c("gc24","gc25","gc26","gc27","gc28","gc29","gc30","gc31","gc33")
-
-
-
 
 
 # print("make bsseq data")
