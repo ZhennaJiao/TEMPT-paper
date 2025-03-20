@@ -27,9 +27,8 @@ added_sample_dmr_15 <- readRDS(paste0(res_dir,"callDMR_delta_015_filter_added_sa
 write.csv(added_sample_dmr_15,paste0(res_dir,"DMR_validation_20sample_DSS_file_20250308.csv"))
 
 
-# dmr_region <- added_sample_dmr_15[,1:3]
-# write.table(dmr_region,(paste0(res_dir,"DMR_delta_015_filtered_smaple_20250213.txt")),sep = "\t", row.names = FALSE, col.names = FALSE,quote =FALSE)
-# # write.csv(dmr_15,"/home/jiaozhenna/methylation/project/EM_seq/analysis/DMR_analysis/data/filter_sample/dmrs_fs_delta_15.csv")
+dmr_region <- added_sample_dmr_15[,1:3]
+write.table(dmr_region,(paste0(res_dir,"DMR_delta_015_filtered_smaple_20250213.txt")),sep = "\t", row.names = FALSE, col.names = FALSE,quote =FALSE)
 ```
 
 ## Including Plots
@@ -40,4 +39,3 @@ You can also embed plots, for example:
 plot(pressure)
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
