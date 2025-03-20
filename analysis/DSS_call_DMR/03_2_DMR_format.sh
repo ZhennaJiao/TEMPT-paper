@@ -13,19 +13,13 @@
 
 module load bedtools/2.31.0
 
-## 1.firstly we should short the dmr file which is exported from Rscript in Dmrs.rds file 
-# dmr_file=xxx
-#bedtools sort -i ${dmr_file}.bed > ${dmr_file}_sorted.bed
 
 ## formate sample cov_result to dmr_bed  
 
-# sample_list=("L15-3" "L15-4" "L29-1" "L29-2" "L29-4" "L29-6" "L29-7" "L15-1"
-#             "L30-5" "L121-1" "L15-2" "L15-5" "L15-7" "L30-1" "L30-2" "L30-6" "L127-6" "L121-7") 
-
 sample_list_1=("L15-3" "L15-4" "L15-1" "L15-2" "L15-5" "L15-7" "L29-2" "L29-6") ## bed_b_1
 sample_list_2=("L30-1" "L30-5" "L30-6" "L127-6") ## bed_b_2
-sample_list_3=("L29-1" "L29-7" "L30-2" "L121-7" "L121-1") ## bed_b_3 # "L29-4" filter sample L29-4 because of low coverage
-sample_list_4=("L226-1" "L231-1" "L231-4") # bed_b_4 ##"L226-2" filter sample L226-2 because of low coverage
+sample_list_3=("L29-1" "L29-7" "L30-2" "L121-7" "L121-1") 
+sample_list_4=("L226-1" "L231-1" "L231-4") 
 
 bed_a=/home/jiaozhenna/methylation/project/EM_seq/20241125_data_reanalysis/Call_DMR_filter_add_sample_20250213/results/DMR_delta_015_filtered_smaple_20250213_sorted_remove_blacklist.bed
 bed_b_1=/home/jiaozhenna/methylation/project/EM_seq/20241125_data_reanalysis/reprocessing/sample_30x_data_20241221/results/05_call_meth_data
