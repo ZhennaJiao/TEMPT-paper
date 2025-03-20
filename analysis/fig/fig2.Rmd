@@ -148,7 +148,7 @@ p4 <- ggplot(cpg_data, aes(x =stage, y = smp_cpg_mod_rate)) +
 print(p4)
 ```
 
-#technical
+# technical information
 ```{r}
 sessionInfo()
 ```
