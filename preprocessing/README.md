@@ -35,7 +35,7 @@ This repository provides a  workflow for processing TEMPT-seq data. The pipeline
    - `07_extract_spike_in_subjobs.sh`
 
 8. **Methylation Calling for Spike-In Data**  
-   Call methylation levels specifically for spike-in control sequences.  
+   Call methylation sites specifically for spike-in control sequences.  
    **Scripts:**  
    - `08_call_spike_in_meth_main.sh`  
    - `08_call_spike_in_meth_subjobs.sh`
