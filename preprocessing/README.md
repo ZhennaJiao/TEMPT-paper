@@ -1,6 +1,6 @@
 # TEMPT-seq Data Reprocessing Workflow
 
-This repository provides a streamlined workflow for processing TEMPT-seq data. The pipeline consists of multiple steps, from quality control to methylation analysis. Below is a step-by-step guide to the scripts used in the workflow.
+This repository provides a  workflow for processing TEMPT-seq data. The pipeline consists of multiple steps, from quality control to methylation sites calling. The step-by-step guide to the scripts is followed.
 
 ## Workflow Steps
 
