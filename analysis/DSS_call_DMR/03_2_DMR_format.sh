@@ -1,16 +1,5 @@
 #!/bin/bash
-#SBATCH --job-name=dmr 
-#SBATCH --partition cpu
-#SBATCH -o /home/jiaozhenna/methylation/project/EM_seq/20241125_data_reanalysis/Call_DMR_filter_add_sample_20250213/logs/%j_%x.log
-#SBATCH -e /home/jiaozhenna/methylation/project/EM_seq/20241125_data_reanalysis/Call_DMR_filter_add_sample_20250213/logs/%j_%x.log
-#SBATCH --mail-type=END,FAIL
-#SBATCH --mail-user=2023206500042@whu.edu.cn
-#SBATCH --mem-per-cpu=4G
-#SBATCH --nodes=1
-#SBATCH -n 16
-
-## 15 Jan 2025 modified by Zhenna Jiao
-
+## 15 Jan 2025, modified by Zhenna Jiao
 module load bedtools/2.31.0
 
 
@@ -21,13 +10,13 @@ sample_list_2=("L30-1" "L30-5" "L30-6" "L127-6") ## bed_b_2
 sample_list_3=("L29-1" "L29-7" "L30-2" "L121-7" "L121-1") 
 sample_list_4=("L226-1" "L231-1" "L231-4") 
 
-bed_a=/home/jiaozhenna/methylation/project/EM_seq/20241125_data_reanalysis/Call_DMR_filter_add_sample_20250213/results/DMR_delta_015_filtered_smaple_20250213_sorted_remove_blacklist.bed
-bed_b_1=/home/jiaozhenna/methylation/project/EM_seq/20241125_data_reanalysis/reprocessing/sample_30x_data_20241221/results/05_call_meth_data
-bed_b_2=/home/jiaozhenna/methylation/project/EM_seq/20241125_data_reanalysis/reprocessing/sample_30x_data_20250107/results/04_call_meth_data
-bed_b_3=/home/jiaozhenna/methylation/project/EM_seq/20241125_data_reanalysis/reprocessing/smaple_30x_data_202412/results/04_call_meth_data
-bed_b_4=/home/jiaozhenna/methylation/project/EM_seq/20241125_data_reanalysis/reprocessing/sample_30x_data_20250121/results/04_call_meth_data
-out_put_1=/home/jiaozhenna/methylation/project/EM_seq/20241125_data_reanalysis/Call_DMR_filter_add_sample_20250213/data/sample_bed_for_filter_smaple_20250213
-out_put_2=/home/jiaozhenna/methylation/project/EM_seq/20241125_data_reanalysis/Call_DMR_filter_add_sample_20250213/data/sample_bmeth_for_filter_smaple_20250213
+bed_a=$HOME/methylation/project/EM_seq/20241125_data_reanalysis/Call_DMR_filter_add_sample_20250213/results/DMR_delta_015_filtered_smaple_20250213_sorted_remove_blacklist.bed
+bed_b_1=$HOME/methylation/project/EM_seq/20241125_data_reanalysis/reprocessing/sample_30x_data_20241221/results/05_call_meth_data
+bed_b_2=$HOME/methylation/project/EM_seq/20241125_data_reanalysis/reprocessing/sample_30x_data_20250107/results/04_call_meth_data
+bed_b_3=$HOME/methylation/project/EM_seq/20241125_data_reanalysis/reprocessing/smaple_30x_data_202412/results/04_call_meth_data
+bed_b_4=$HOME/methylation/project/EM_seq/20241125_data_reanalysis/reprocessing/sample_30x_data_20250121/results/04_call_meth_data
+out_put_1=$HOME/methylation/project/EM_seq/20241125_data_reanalysis/Call_DMR_filter_add_sample_20250213/data/sample_bed_for_filter_smaple_20250213
+out_put_2=$HOME/methylation/project/EM_seq/20241125_data_reanalysis/Call_DMR_filter_add_sample_20250213/data/sample_bmeth_for_filter_smaple_20250213
 mkdir -p ${out_put_1}
 mkdir -p ${out_put_2}
 
