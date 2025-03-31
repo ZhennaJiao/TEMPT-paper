@@ -1,6 +1,6 @@
 # TEMPT-seq Data Reprocessing Workflow
 
-This repository provides a streamlined workflow for processing TEMPT-seq data. The pipeline consists of multiple steps, from quality control to methylation analysis. Below is a step-by-step guide to the scripts used in the workflow.
+This repository provides a  workflow for processing TEMPT-seq data. The pipeline consists of multiple steps, from quality control to methylation sites calling. The step-by-step guide to the scripts is followed.
 
 ## Workflow Steps
 
@@ -35,7 +35,7 @@ This repository provides a streamlined workflow for processing TEMPT-seq data. T
    - `07_extract_spike_in_subjobs.sh`
 
 8. **Methylation Calling for Spike-In Data**  
-   Call methylation levels specifically for spike-in control sequences.  
+   Call methylation sites specifically for spike-in control sequences.  
    **Scripts:**  
    - `08_call_spike_in_meth_main.sh`  
    - `08_call_spike_in_meth_subjobs.sh`

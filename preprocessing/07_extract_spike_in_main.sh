@@ -1,13 +1,6 @@
 #!/bin/bash
-#SBATCH --job-name=sp 
-#SBATCH --partition cpu
-#SBATCH -o /home/jiaozhenna/methylation/project/EM_seq/20241125_data_reanalysis/reprocessing/smaple_30x_data_202412/logs/%j_%x.log
-#SBATCH -e /home/jiaozhenna/methylation/project/EM_seq/20241125_data_reanalysis/reprocessing/smaple_30x_data_202412/logs/%j_%x.log
-#SBATCH --mail-type=END,FAIL
-#SBATCH --mail-user=2023206500042@whu.edu.cn
-#SBATCH --nodes=1
-#SBATCH --mem-per-cpu=4g
-#SBATCH -n 24
+## modified by Zhenna Jiao 
+## 2025-03-15
 
 module load samtools/1.18
 sample=$1

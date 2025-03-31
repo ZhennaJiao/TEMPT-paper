@@ -23,17 +23,17 @@ library(data.table)
 ```{r }
 samples <-  c("L30-2_new","L121-1","L121-7","L29-1","L29-4_new","L29-7")
 
-proj_dir <- "/home/jiaozhenna/methylation/project/EM_seq/20241125_data_reanalysis/reprocessing/smaple_30x_data_202412/results/08_spikein_call_meth/"
+proj_dir <- "~/methylation/project/EM_seq/20241125_data_reanalysis/reprocessing/smaple_30x_data_202412/results/08_spikein_call_meth/"
 results_list_non_meth_2kb_3 <- list()
 results_list_meth_2kb_3 <- list()
 results_list_non_meth_lambda <- list()
 results_list_meth_lambda <- list()
 
-kb_fig_dir <- "/home/jiaozhenna/methylation/project/EM_seq/20241125_data_reanalysis/reprocessing/smaple_30x_data_202412/results/05_spikein_QC/fig_2kb_3/"
+kb_fig_dir <- "~/methylation/project/EM_seq/20241125_data_reanalysis/reprocessing/smaple_30x_data_202412/results/05_spikein_QC/fig_2kb_3/"
 
 dir.create(kb_fig_dir, recursive = TRUE)
 
-lambda_dir <- "/home/jiaozhenna/methylation/project/EM_seq/20241125_data_reanalysis/reprocessing/smaple_30x_data_202412/results/05_spikein_QC/fig_lambda/"
+lambda_dir <- "~/methylation/project/EM_seq/20241125_data_reanalysis/reprocessing/smaple_30x_data_202412/results/05_spikein_QC/fig_lambda/"
 
 
 dir.create(lambda_dir, recursive = TRUE)

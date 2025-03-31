@@ -8,7 +8,7 @@ library(magrittr)
 library(readxl)
 library(matrixStats)
 
-dat_met <- "/home/jiaozhenna/methylation/project/EM_seq/20241125_data_reanalysis/metadata/sample_metadata_20250207.xlsx"
+dat_met <- "~/methylation/project/EM_seq/20241125_data_reanalysis/metadata/sample_metadata_20250207.xlsx"
 meta <- read_excel(dat_met,sheet = "filter_added_sample")
 ##
 print(meta$Sample)
@@ -21,10 +21,10 @@ print(meta$Sample_name)
 
 
 ## read call meth results and store in a list 
-proj_dir_1 <- "/home/jiaozhenna/methylation/project/EM_seq/20241125_data_reanalysis/reprocessing/sample_30x_data_20241221/results/05_call_meth_data/"
-proj_dir_2 <- "/home/jiaozhenna/methylation/project/EM_seq/20241125_data_reanalysis/reprocessing/smaple_30x_data_202412/results/04_call_meth_data/"
-proj_dir_3 <- "/home/jiaozhenna/methylation/project/EM_seq/20241125_data_reanalysis/reprocessing/sample_30x_data_20250107/results/04_call_meth_data/"
-proj_dir_4 <- "/home/jiaozhenna/methylation/project/EM_seq/20241125_data_reanalysis/reprocessing/sample_30x_data_20250121/results/04_call_meth_data/"
+proj_dir_1 <- "~/methylation/project/EM_seq/20241125_data_reanalysis/reprocessing/sample_30x_data_20241221/results/05_call_meth_data/"
+proj_dir_2 <- "~/methylation/project/EM_seq/20241125_data_reanalysis/reprocessing/smaple_30x_data_202412/results/04_call_meth_data/"
+proj_dir_3 <- "~/methylation/project/EM_seq/20241125_data_reanalysis/reprocessing/sample_30x_data_20250107/results/04_call_meth_data/"
+proj_dir_4 <- "~/methylation/project/EM_seq/20241125_data_reanalysis/reprocessing/sample_30x_data_20250121/results/04_call_meth_data/"
 #create a blank list to store the data frame 
 current_sample_data_list <- list()
 
@@ -82,7 +82,7 @@ for (i_sample in meta$Sample_name) {
   }
 
 }
-results_dir <- "/home/jiaozhenna/methylation/project/EM_seq/20241125_data_reanalysis/Call_DMR_filter_add_sample_20250213/results/"
+results_dir <- "~/methylation/project/EM_seq/20241125_data_reanalysis/Call_DMR_filter_add_sample_20250213/results/"
 
 saveRDS(current_sample_data_list,file =paste0(results_dir,"EMobject_filter_added_sample_20250213_data_list.rds"))
 
