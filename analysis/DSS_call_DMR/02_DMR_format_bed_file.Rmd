@@ -15,12 +15,12 @@ library(RColorBrewer)
 library(ComplexHeatmap)
 ```
 
-##Create DMR-region file.bed
+##Create DMR-region file. bed
 
-import the DMR and extract the top of three columns and save as bed file which contains chromosome number , stratsite and end site  
+import the DMR and extract the top of three columns and save as bed file which contains chromosome number, strat site and end site  
 
 ```{r cars}
-res_dir="/home/jiaozhenna/methylation/project/EM_seq/20241125_data_reanalysis/Call_DMR_filter_add_sample_20250213/results/"
+res_dir="~/methylation/project/EM_seq/20241125_data_reanalysis/Call_DMR_filter_add_sample_20250213/results/"
 added_sample_dmr_15 <- readRDS(paste0(res_dir,"callDMR_delta_015_filter_added_sample_20250213.rds"))
 
 
