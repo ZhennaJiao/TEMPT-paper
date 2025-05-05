@@ -4,7 +4,8 @@ author: "Zhenna Jiao"
 date: "`r Sys.Date()`"
 output: html_document
 ---
-# load packages
+# Load packages
+
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 library(ggplot2)
@@ -20,22 +21,19 @@ library(matrixStats)
 library(RColorBrewer)
 library(ComplexHeatmap)
 ```
-
 ## Import the data directory
+
 ```{r}
 fig_dir <- "~/methylation/project/EM_seq/analysis/technical/figure/fig2/"
 proj <- "~/methylation/project/EM_seq/data/metadata/"
 technical_dat_dir <- "~/methylation/project/EM_seq/analysis/technical/data/"
 meta_df <- readRDS("~/methylation/project/EM_seq/data/metadata/meta_df.rds")
 dat_dir <- "~/methylation/project/EM_seq/analysis/DMR_analysis/result/technical/"
-
 ```
-
-
-## Figure S6 A-B  samples input concentration(EV-DNA in patients plasma) and coverage 
+## Figure S6 A-B  Make a violin plot for the  input concentration of EV-DNA (EV-DNA in patients' plasma) and the coverage of  the DNA sequencing of the genome 
 
 ```{r}
-##import data
+## import data
 input_df <- read_excel(paste0(technical_dat_dir,"downsample.xlsx"),sheet = "downsample")
 
 dat <- input_df[,c(1,19:20)]
@@ -46,7 +44,7 @@ dat$status <- substr(state,1,2)%>%as.factor()
 dat$type <- c(rep("GP",21),rep("GC",23))%>%as.factor()
 p_value_cov <- wilcox.test(dat$coverage[1:21],dat$coverage[22:44])[["p.value"]]
 
-## do plot for coverage difference between gp and gc 
+## Make a  plot for the difference between GP and GC  on the coverage of the genome  
 p7 <- ggplot(dat, aes(x =type, y =coverage,col=type)) +
           geom_violin(aes(fill=type,alpha=0.5),scale="width")+
           scale_fill_manual(values=c("#FB8D8D","#C0E1FF"))+
@@ -61,15 +59,13 @@ p7 <- ggplot(dat, aes(x =type, y =coverage,col=type)) +
                 axis.text.y = element_text(size = 15,colour = "black"),
                 axis.title = element_text(size = 15,colour = "black"),
                 axis.line = element_line(size=1,linetype = 1,color = "black"))
-        
-      
+   
 # ggsave(plot = p7,filename =paste0(fig_dir,"figS2F_1_downsample_sample_cov_20240902.pdf"),
 #        width = 8,height = 6 ,dpi = 300)
         print(p7)
 
-## do plot for input concentration difference between gp and gc 
+## Make a  plot for the difference between GP and GC on the input concentration of EV-DNA   
 p_value_input <- wilcox.test(dat$plasma_conc[1:21],dat$plasma_conc[22:44])[["p.value"]]
-
 p8 <- ggplot(dat, aes(x =type, y =plasma_conc,col=type)) +
           geom_violin(aes(fill=type,alpha=0.5),scale="width")+
           scale_fill_manual(values=c("#FB8D8D","#C0E1FF"))+
@@ -90,12 +86,12 @@ p8 <- ggplot(dat, aes(x =type, y =plasma_conc,col=type)) +
 print(p8)
 
 ```
-## Figure S7 A  The barplot for samples age distribution between control early stage and advanced stage 
+## Figure S7A Bar plot showing the distribution of sample ages across control, early-stage, and advanced-stage groups.
+
 ```{r,fig.width=8,fig.height=6}
 ## import data
-
 age_gender_df <- read_excel(paste0(technical_dat_dir,"age_and_gender.xlsx"),sheet = "filter_sample")
-age_gender_df$Stage <- factor(age_gender_df$Stage,levels = c("Control","Early Stage","Advanced Stage"))
+age_gender_df$Stage <- factor(age_gender_df$Stage, levels = c("Control", "Early Stage", "Advanced Stage"))
 ## do boxplot
 p6 <-ggplot(age_gender_df, aes(x=Stage,y=Age))+
     geom_boxplot(outlier.shape = NA,lwd=0.6,
@@ -119,11 +115,10 @@ p6 <-ggplot(age_gender_df, aes(x=Stage,y=Age))+
 # ggsave(plot = p6,filename = paste0(fig_dir,"figS2E_boxplot_age_gender.pdf"),width = 8,height = 6,dpi = 300)
 print(p6)
 ```
+## Figure S7 B  Methylation level variance  in 1-MB bins of the genome between GP and GC
 
-## Figure S7 B methylation level variance  in 1mb genome between GP and GC
 ```{r}
 merge_df <- readRDS("~/methylation/project/EM_seq/analysis/technical/data/ds_1kb_count.rds")
-
 mat2<- merge_df
 meth<- merge_df
 meth$idx <- floor(meth$start / 1000000)  # generate index for each 1,000,000 bp bin
@@ -131,10 +126,8 @@ meth[is.na(meth)]<-0
 meth<-sapply(meth[,-1], as.numeric)
 meth<-data.frame(meth)
 meth$Chr<-mat2$chr
-
 counts <- aggregate(meth[, grep("mC|nC|uC", colnames(meth))], by = list(meth$Chr, meth$idx), FUN=sum)  
-
-#calculate methylation
+# calculate methylation
 for (indexmC in grep("_mC", colnames(counts))) { #index columns containing "_mC" in colname
   indexuC <- grep(gsub("_mC", "_uC", colnames(counts)[indexmC]), colnames(counts)) #index columns with uC
   m<-counts[,indexmC]/(counts[,indexuC]+counts[,indexmC])
@@ -142,13 +135,11 @@ for (indexmC in grep("_mC", colnames(counts))) { #index columns containing "_mC"
   counts<-data.frame(counts,m)
   colnames(counts)[n+1]<-gsub("_mC", "_mod", colnames(counts)[indexmC]) 
 }  
-
 autosomes<-c("chr1$","chr2$","chr3$","chr4$","chr5$","chr6$","chr7$","chr8$","chr9$","chr10$",
              "chr11$","chr12$","chr13$","chr14$","chr15$","chr16$","chr17$","chr18$","chr19$","chr20$","chr21$","chr22$")
 
-#select autosomes
+# select autosomes
 counts<-counts[grep(paste(autosomes, collapse = "|"),counts$Group.1),]
-
 
 mod_df=counts[,grep("_mod",colnames(counts))]
 mod_df$pos<-paste(counts$Group.1, counts$Group.2, sep="_")
@@ -193,19 +184,17 @@ p5 <- ggplot(var.melt, aes(x =status, y =value)) +
           )
 print(p5)
 ```
+## Figure S7 C The distribution of %CpG modified level in 1-MB bins in different chromosomes
 
-## Figure S7 C the distribution of %CpG modified level in 1million region in different chromosomes
 ```{r}
-##import data
+## import data
 merge_df <- readRDS("~/methylation/project/EM_seq/analysis/technical/data/ds_1kb_count.rds")
-
-## define the function to do plot for the methylation level in million region on different chromosomes 
+## Define the function to make a plot for the methylation level in 1-MB bins on different chromosomes 
 chr_variance <- function(data,chromosome){
 mat2 <- data
  
 mat<-mat2%>%dplyr::filter(chr==chromosome)
-
-# prepare 1 mb windows
+# prepare 1-MB bins
 ws<-1000
 mat$bin<-c(1:nrow(mat))
 mat<-data.frame(mat)
@@ -275,7 +264,6 @@ p1<-ggplot(healthy.melt, aes(x=bin, y=value, colour=variable))+
 #        width = 6,height = 4,dpi=300)
 print(p1)
 
-
 p2<-ggplot(hcc.melt, aes(x=bin, y=value, colour=variable))+
   geom_line()+
   theme_classic()+
@@ -298,18 +286,17 @@ print(p2)
 }
 
 
-## plot the methylation level on chromosome 4
+## Plot the methylation level on chromosome 4
 i=4
 chr_variance(data = merge_df ,chromosome = paste0("chr",i))
 ```
+## Figure S7 D The distribution of %CpG modified level 
 
-## Figure S7 D the distribution of %CpG modified level 
 ```{r}
-##import data
+## import data
 sample_names <- meta_df$sample_list
 smp_chr_data <- readRDS(paste0(dat_dir,"smp_chr_data.rds"))
 mod_count <- readRDS(paste0(dat_dir,"mod_count.rds"))
-
 df <- do.call(rbind, lapply(names(mod_count), function(name) mod_count[[name]]))
 df$mod <- df$mod/100
 
@@ -336,11 +323,9 @@ colnames(sums)<-c("name","total")
 df <- merge(x = df, y = sums, by = "name")
 df$freq<-(df$count/df$total)*100
 
-
 df$status<-NA
 df$status[grep("gp",df$name)]<-"GP"
 df$status[grep("sc",df$name)]<-"GC"
-
 # df$status[grep("Healthy_",df4$name)]<-"Healthy"
 
 df2<-aggregate(freq ~ bin + status, FUN=mean, data=df)
@@ -350,7 +335,7 @@ df$mean_freq<-NA
 df3 <- df %>% right_join(df2, by=c("bin","status"))
 df3$status<-factor(df3$status, levels=c("GP","GC"), ordered=TRUE)
 
-## do hist plot 
+## do histgram plot 
 b.mod_gp <- ggplot(df3[df3$status == "GP",]) +
   geom_bar(aes(x=bin, y=freq.y), position="identity", stat="identity", color="black", fill="#C0E1FF") +
   geom_line(aes(x=bin, y=freq.x, colour=name), position="identity", stat="identity") +
@@ -403,8 +388,8 @@ b.mod_gc <- ggplot(df3[df3$status == "GC",]) +
 # ggsave(paste0(fig_dir,"figS2A_plot_GC_mod_level.pdf"),plot = b.mod_gc,width = 4,height =4,dpi = 300)
 print(b.mod_gc)
 ```
+## Figure S8 A  Create a heatmap to visualize the correlation of methylation levels across DMRs detected between early and advanced stages.
 
-## Figure S8 A  Do correlation heatmap about DMR which called between Early and Advanced Stage 
 ```{r,fig.width=14,fig.height=10}
 ## set fig_stored dir
 fig_dir <- "~/methylation/project/EM_seq/analysis/DMR_analysis/figures/figS5-6/"
@@ -412,7 +397,8 @@ meta_scstage_df <- readRDS("~/methylation/project/EM_seq/data/metadata/meta_scst
 sc_dat_dir <- "~/methylation/project/EM_seq/analysis/DMR_analysis/data/filter_sample/scstage_dmr_change/"
 ## import sc_satge data
 scstage_DMR_meth <- readRDS(paste0(sc_dat_dir,"scstage_DMR_change_meth.rds"))
-## calculate pearson correlation coefficient matrix
+## calculate Pearson correlation coefficient matrix
+
 data_keep_na <-  scstage_DMR_meth
 row.names(data_keep_na) <- as.character(scstage_DMR_meth$chr_region)
 data_keep_na <- data_keep_na[,-1]
@@ -441,11 +427,10 @@ pheatmap::pheatmap(DMR_cor_df_keepna,cluster_rows = T ,cluster_cols =T,show_rown
 
 # dev.off()
 ```
-
-## Figure S8 B Do pca about DMR which called between Early and Advanced Stage
+## Figure S8 B Perform PCA analysis on DMRs called between the Early and Advanced Stages
 
 ```{r}
-## import  data remove missing value
+## import  data,  remove missing value
 dat_rm_na <- scstage_DMR_meth%>%na.omit()
 ## trans data format
 rownames(dat_rm_na) <- as.character(dat_rm_na$chr_region)
@@ -485,11 +470,11 @@ p1 <-ggplot(data = pc_one,aes(x=PC1,y=PC2,color=Stage))+
 print(p1)
 ```
 ## Figure S8 C 
+
 ```{r}
 proj_dir <- "~/methylation/project/EM_seq/analysis/DMR_analysis/result/annotation_dmr/"
 dat_sc <- read_excel(paste0(proj_dir,"dmr_features.xlsx"),sheet = "scstage_dmr_feature_fisher")
 dat_sc$logp <- -log(dat_sc$two_tail,10)
-
 p4 <- ggplot(dat_sc, aes(y= elments, x= logp)) +
       geom_bar(stat = "identity",fill="#F9A68A",color = "#F9A68A", width = 0.8) +
       theme_classic()+
@@ -560,7 +545,7 @@ sorted_h_dat[100,36] <- "chr8_58534885_58535347_SDCBP_1"
 rownames(sorted_go_dat) <- sorted_h_dat$new_col
 heatmap_dat <- sorted_go_dat[,c(3:23)]%>%as.matrix()
 
-## pull sample names according gender
+## pull sample names according to gender
 sc_male <-meta_scstage_df %>% 
   filter(gender=="Male")%>%
   pull(sample_names)
@@ -568,14 +553,11 @@ sc_male <-meta_scstage_df %>%
 sc_female <-meta_scstage_df %>% 
   filter(gender=="Female")%>%
   pull(sample_names)
-
-###
 heat_male_dat <- heatmap_dat[,sc_male,drop=FALSE]
 heat_female_dat <- heatmap_dat[,sc_female,drop=FALSE]
 sc_male_df <- meta_scstage_df[meta_scstage_df$sample_names%in%sc_male,]
 sc_female_df <- meta_scstage_df[meta_scstage_df$sample_names%in%sc_female,]
 
-#### 
 status_colors <- c("Control" = "#63A6D0", "Early Stage" = "#F9A68A", "Advanced Stage" = "#D34447")
 gender_colors <- c("Male" = "#AACBFE", "Female" = "#DE8686")
 my_color=c("#4675FE","#F9F5C9","#FCA605")
@@ -593,7 +575,7 @@ ann_sc_female <- HeatmapAnnotation(Status=sc_female_df$stage,
                                   Status = status_colors,
                                   Gender = gender_colors))
 sorted_h_dat$elemnets <- as.factor(sorted_h_dat$elemnets)
-## write the output data
+## Write the output data
 sorted_h_dat_output <- sorted_h_dat[,c(1,9:12,14:35)]
 sorted_h_dat_output$chr_region <- paste0(sorted_h_dat_output$Chr,"_",sorted_h_dat_output$Start,"_",sorted_h_dat_output$End)
 
@@ -698,17 +680,12 @@ p
 # dev.off()
 
 ```
+## Figure S17 A-B Make violin plot of scstage_dmr associated gene
 
-
-
-
-## Figure S17 A-B scstage_dmr associated gene violin plot
 ```{r,echo=TRUE}
 ## import data
 gene_dat <- "~/methylation/project/EM_seq/analysis/DMR_analysis/result/scstage_change_ann/"
-
 smp_scsatge_list <- meta_scstage_df$sample_list
-
 smp_scstage_DMR_meth <- read.table(paste0(sc_dat_dir,"scstage_dmr_change_region.sorted.txt"),col.names = "chr_region")
 smp_scstage_DMR_cov <- read.table(paste0(sc_dat_dir,"scstage_dmr_change_region.sorted.txt"),col.names = "chr_region")
 
@@ -723,7 +700,7 @@ scstage_meth_dmr <- read.csv(paste0(gene_dat,"scstage_meth_data.csv"))
 scstage_meth_dmr$p_adjust <- as.numeric(scstage_meth_dmr$p_adjust)
 scstage_dat_ann <- scstage_meth_dmr
 
-## trans data format
+## transform data format
 scstage_dat_ann[,c(1:5)] <- lapply(scstage_dat_ann[,c(1:5)], as.character)
 scstage_dat_ann$chr_region <- apply(scstage_dat_ann[,c(1:3)], 1, function(x) paste(x,collapse = "_"))
 scstage_dat_ann$gene_region <-  apply(scstage_dat_ann[, c(1:5)], 1, function(x) paste(x, collapse = "_"))
@@ -737,7 +714,7 @@ scstage_meth_ann <- merge_scstage_meth_ann[,c(2,24:44)]
 merge_scstage_cov_ann <- merge(scstage_dmr_ann,smp_scstage_DMR_cov,by="chr_region")
 scstage_cov_ann <- merge_scstage_cov_ann[,c(2,24:44)]
 
-## sc stage methylation level matrix 
+## sc stages methylation level matrix 
 data <- scstage_meth_ann
 rownames(data) <- as.character(data$gene_region)
 data <- data[, -1]
@@ -754,19 +731,17 @@ tr_data_co <- t(data_cov)
 rownames(tr_data_co) <- colnames(data_cov)
 colnames(tr_data_co) <- rownames(data_cov)
 tr_data_cov <- as.data.frame(tr_data_co)
-##
 
 common_cols <- intersect(names(tr_data_cov), names(tr_data_meth))
 count=0
 
 p_value <- list()
-## 
 for (col in common_cols[1:10]) {
   df <- data.frame(x = tr_data_cov[[col]], y = tr_data_meth[[col]]) 
   df$status <- meta_scstage_df$stage
   df$smp <- str_sub(rownames(tr_data_cov),1,4)
   df <- na.omit(df)
-  ## do scatter plot 
+  ## make a scatter plot 
     wilcox_test <- wilcox.test(df$y[df$status=="Early Stage"],df$y[df$status=="Advanced Stage"],paired = FALSE)
     p.value <- wilcox_test$p.value
     p_value[[col]] <- p.value
@@ -795,12 +770,7 @@ for (col in common_cols[1:10]) {
             count=count+1 }
           print(count)
  }
-
-
-
-
 ```
-
 ## Figure S18 A-B 
 
 ```{r}
@@ -856,8 +826,7 @@ if (clor=="Cancer") {
                 "heart"="#F0027F" )
   }else{
         stop("Error: Typo! GC or GP label expected!")
-}
-    
+}    
 
   p <- ggplot(data = seldat, aes(x = "", y = value, fill = tissue)) + 
           geom_bar(width = 1, stat = "identity", color = "white") +
@@ -874,8 +843,6 @@ if (clor=="Cancer") {
  print(p1)
  p2 <- tissue_contribution_pie_plot("Benign","Benign")
  print(p2)
-
-
 ```
 ## Figure S18 C-D
 
@@ -885,7 +852,6 @@ meta_df <- readRDS("~/methylation/project/EM_seq/data/metadata/meta_df.rds")
 sample_list <- meta_df$sample_list
 dat_dir <- "~/methylation/project/EM_seq/analysis/deconv_analysis/TAPS_data/data/"
 
-## 
 sample_mixtures <- read.csv(paste0(dat_dir,"sample_mixtures.csv"),sep = "\t")
 df_1 <- sample_mixtures
 col_value <- colnames(df_1)[2:39]
@@ -906,14 +872,13 @@ wilcox_rls <- wilcox.test(df_1$probility[df_1$smp_type == "GC"],
                           df_1$probility[df_1$smp_type == "GP"],exact = FALSE)
 p.val <- wilcox_rls$p.value
 
-
 mean_fold_change_GC <- mean(df_1$probility[df_1$smp_type == "GC"])/mean(df_1$probility[df_1$smp_type == "GP"])
 mean_fold_change_GP <- mean(df_1$probility[df_1$smp_type == "GP"])/mean(df_1$probility[df_1$smp_type == "GC"])
 
 print(paste0("Mean ",i," fold change GC/GP is ",round(mean_fold_change_GC,3)))
 print(paste0("Mean ",i," fold change GP/GC is ",round(mean_fold_change_GP,3)))
 
-##do violin plot 
+## make a violin plot 
 plot <- ggplot(df_1, aes(x = smp_type, y = probility)) +
   geom_violin(aes(fill=smp_type,alpha=1),scale = "width") +
   scale_fill_manual(values =c("#FC9595", "#C4E3FF"))+
@@ -923,8 +888,8 @@ plot <- ggplot(df_1, aes(x = smp_type, y = probility)) +
   labs(y =paste0("Probability of originating"), x =" ", 
        title = paste0("cell type ", i, "\n",
                       "p = ", round(p.val, 3) ,"\n",
-                      "mean fold change GC/GP  ",round(mean_fold_change_GC,3),"\n",
-                      "mean fold change GP/GC  ",round(mean_fold_change_GP,3)))+
+                      "mean fold change GC/GP ", round(mean_fold_change_GC,3),"\n",
+                      "mean fold change GP/GC ", round(mean_fold_change_GP,3)))+
   theme_classic()+ 
   theme(
      axis.text.x = element_text(size = 15),
@@ -942,15 +907,11 @@ p_dataframe <- data.frame(tissue_type=names(p_value),
                              p_val=unlist(p_value))
 p_dataframe$p_adjust <- p.adjust(p_dataframe$p_val,method = "BH")
  print(p_dataframe)
-
-
-
-
 ```
 ## Figure S19 The same analysis process is shown in Figure S17
 
-
 ## Technical 
+
 ```{r}
 sessionInfo()
 ```
