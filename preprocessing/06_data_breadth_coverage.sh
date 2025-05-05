@@ -3,12 +3,12 @@
 
 module load samtools/1.14
 
-# Calculate the breath  of coverage 
+# Calculate the breadth  of coverage 
 
 
 sample_list=("L02_L29-1" "L02_L29-4" "L02_L29-7" "L03_L121-1" "L03_L121-5" "L03_L121-7" "L03_L29-8" "L03_L30-2" "L03_L30-8")
 
-## For these steps, we need to sort the bam file firstly
+## For these steps, we need to sort the BAM file first
 
 input_dir=$HOME/methylation/project/EM_seq/20241125_data_reanalysis/reprocessing/sample_1x_data_20241210/results/03_mapped_data
 out_dir=$HOME/methylation/project/EM_seq/20241125_data_reanalysis/reprocessing/sample_1x_data_20241210/results/06_breath_cov_data
