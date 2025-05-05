@@ -16,7 +16,7 @@ library(data.table)
 library(RColorBrewer)
 library(data.table)
 ```
-## Create a blank to store results.
+## Create a blank list to store results.
 
 ```{r }
 samples <-  c("L30-2_new","L121-1","L121-7","L29-1","L29-4_new","L29-7")
@@ -86,7 +86,7 @@ dir.create(lambda_dir, recursive = TRUE)
     results_list_meth_2kb_3[[i_sample]] <- t_2kb_3_meth_rate
   }
 ```
-## Write the 2kb_3 result in csv
+## Save the 2kb_3 result in csv
 
 ```{r}
 result_df <- data.frame(sample = names(results_list_non_meth_2kb_3), t_2kb_3_non_meth_percentage =
@@ -144,7 +144,7 @@ write.csv(result_df, file = paste0(kb_fig_dir,"2kb_3_meth_results.csv"), row.nam
     
   }
 ```
-## Write the lambda result in csv
+## Save the lambda result in csv
 
 ```{r}
 result_lambda <- data.frame(sample = names(results_list_meth_lambda), lambda_meth_percentage = unlist(results_list_meth_lambda),
