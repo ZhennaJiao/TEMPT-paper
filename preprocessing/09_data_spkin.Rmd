@@ -144,7 +144,7 @@ write.csv(result_df, file = paste0(kb_fig_dir,"2kb_3_meth_results.csv"), row.nam
     
   }
 ```
-## Save the lambda result in csv
+## Save the lambda result in csv format
 
 ```{r}
 result_lambda <- data.frame(sample = names(results_list_meth_lambda), lambda_meth_percentage = unlist(results_list_meth_lambda),
