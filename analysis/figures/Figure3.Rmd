@@ -54,7 +54,7 @@ dmr_dat_dir <- "~/methylation/project/EM_seq/analysis/DMR_analysis/data/filter_s
 sample_DMR_meth <- readRDS(paste0(dmr_dat_dir,"sample_DMR_meth.rds"))
 sample_DMR_meth_nona <- na.omit(sample_DMR_meth)
 
-## Do correlation for keep missing value (use the parameter "pairwise")
+## Perform correlation analysis without removing missing values (use the parameter "pairwise")
 data_keep_na <-  sample_DMR_meth
 row.names(data_keep_na) <- as.character(sample_DMR_meth$chr_region)
 data_keep_na <- data_keep_na[,-1]
