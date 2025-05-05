@@ -4,7 +4,7 @@
 ## because some regions are in genome's blacklist, this may take some noise in our downstream analysis on DMRs 
 ## So it is necessary to remove them 
 ## The code refers to  https://www.biostars.org/p/184537/
-## The hg38 genome blacklist downloaded from  https://github.com/Boyle-Lab/Blacklist
+## The hg38 genome blacklist was downloaded from  https://github.com/Boyle-Lab/Blacklist
 
 module load bedtools/2.31.0 
 
