@@ -198,7 +198,7 @@ mat<-mat2%>%dplyr::filter(chr==chromosome)
 ws<-1000
 mat$bin<-c(1:nrow(mat))
 mat<-data.frame(mat)
-#index widows
+# index windows
 for (i in grep ("bin", colnames(mat))){
   mat$index<-ceiling(mat[,i]/ws)
 }
@@ -335,7 +335,7 @@ df$mean_freq<-NA
 df3 <- df %>% right_join(df2, by=c("bin","status"))
 df3$status<-factor(df3$status, levels=c("GP","GC"), ordered=TRUE)
 
-## do histgram plot 
+## do histogram plot 
 b.mod_gp <- ggplot(df3[df3$status == "GP",]) +
   geom_bar(aes(x=bin, y=freq.y), position="identity", stat="identity", color="black", fill="#C0E1FF") +
   geom_line(aes(x=bin, y=freq.x, colour=name), position="identity", stat="identity") +
@@ -432,7 +432,7 @@ pheatmap::pheatmap(DMR_cor_df_keepna,cluster_rows = T ,cluster_cols =T,show_rown
 ```{r}
 ## import  data,  remove missing value
 dat_rm_na <- scstage_DMR_meth%>%na.omit()
-## trans data format
+## Convert data format
 rownames(dat_rm_na) <- as.character(dat_rm_na$chr_region)
 dat_rm_na <- dat_rm_na[, -1]
 tr_data <- t(dat_rm_na)
@@ -575,7 +575,7 @@ ann_sc_female <- HeatmapAnnotation(Status=sc_female_df$stage,
                                   Status = status_colors,
                                   Gender = gender_colors))
 sorted_h_dat$elemnets <- as.factor(sorted_h_dat$elemnets)
-## Write the output data
+## Save the output data
 sorted_h_dat_output <- sorted_h_dat[,c(1,9:12,14:35)]
 sorted_h_dat_output$chr_region <- paste0(sorted_h_dat_output$Chr,"_",sorted_h_dat_output$Start,"_",sorted_h_dat_output$End)
 
@@ -695,12 +695,12 @@ for (i_sample in smp_scsatge_list){
  smp_scstage_DMR_meth[[i_sample]] <- a$meth_level
  smp_scstage_DMR_cov[[i_sample]] <- a$mod+a$unmod
 }
-## scstage_meth_dmr 2414 dmr_region
+## scstage_meth_dmr 2414 DMR regions
 scstage_meth_dmr <- read.csv(paste0(gene_dat,"scstage_meth_data.csv"))
 scstage_meth_dmr$p_adjust <- as.numeric(scstage_meth_dmr$p_adjust)
 scstage_dat_ann <- scstage_meth_dmr
 
-## transform data format
+## convert data format
 scstage_dat_ann[,c(1:5)] <- lapply(scstage_dat_ann[,c(1:5)], as.character)
 scstage_dat_ann$chr_region <- apply(scstage_dat_ann[,c(1:3)], 1, function(x) paste(x,collapse = "_"))
 scstage_dat_ann$gene_region <-  apply(scstage_dat_ann[, c(1:5)], 1, function(x) paste(x, collapse = "_"))
@@ -815,7 +815,7 @@ if (clor=="Cancer") {
                 "intestine"="#FFD92F","Other"="#B3B3B3")
   
   }else if (clor=="Benign") {
-     ## define GP tissues and paried color 
+     ## define GP tissues and paired color 
  mycolors <- c("neutrophil"="#8DD3C7","spleen"="#FFFFB3","dendritic cell"="#BEBADA","monocyte"="#FDB462",
                 
                 "Thymus"="#FB8072","Other"="#B3B3B3","osteoclast"="#B3DE69", "macrophage"="#80B1D3",
