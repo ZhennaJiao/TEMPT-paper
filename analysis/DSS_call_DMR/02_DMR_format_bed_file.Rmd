@@ -4,6 +4,7 @@ author: "Zhenna Jiao"
 date: "`r Sys.Date()`"
 output: html_document
 ---
+## Load packages 
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
@@ -14,28 +15,14 @@ library(magrittr)
 library(RColorBrewer)
 library(ComplexHeatmap)
 ```
-
-##Create DMR-region file. bed
-
-import the DMR and extract the top of three columns and save as bed file which contains chromosome number, strat site and end site  
+## Create DMR-region file. bed
+* Import the DMR and extract the top three columns and save as a bed file, which contains the chromosome number, start site, and end site  
 
 ```{r cars}
 res_dir="~/methylation/project/EM_seq/20241125_data_reanalysis/Call_DMR_filter_add_sample_20250213/results/"
 added_sample_dmr_15 <- readRDS(paste0(res_dir,"callDMR_delta_015_filter_added_sample_20250213.rds"))
-
-
 write.csv(added_sample_dmr_15,paste0(res_dir,"DMR_validation_20sample_DSS_file_20250308.csv"))
-
-
 dmr_region <- added_sample_dmr_15[,1:3]
 write.table(dmr_region,(paste0(res_dir,"DMR_delta_015_filtered_smaple_20250213.txt")),sep = "\t", row.names = FALSE, col.names = FALSE,quote =FALSE)
-```
-
-## Including Plots
-
-You can also embed plots, for example:
-
-```{r pressure, echo=FALSE}
-plot(pressure)
 ```
 
