@@ -1,0 +1,199 @@
+---
+title: "Fig2 - codes"
+author: "Zhenna Jiao"
+date: "`r Sys.Date()`"
+output: html_document
+---
+# Load packages
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(ggplot2)
+library(readxl)
+library(ggpubr)
+library(stringr)
+library(readr)
+library(Rmisc)
+library(dplyr)
+library(smoother)
+library(reshape2)
+library(matrixStats)
+library(RColorBrewer)
+```
+
+# Define the data dir
+
+```{r}
+fig_dir <- "~/methylation/project/EM_seq/analysis/technical/figure/fig2/"
+proj <- "~/methylation/project/EM_seq/data/metadata/"
+```
+
+# Fig2B
+
+```{r}
+## import data
+dat1 <- read_excel(paste0(proj,"ds_filter.xlsx"),sheet = "filter_lowqc_smp")
+readsta <- dat1[1:38,c(3,8,13)]
+colnames(readsta) <- c("sample","total_reads","map_reads_rate")
+readsta$total_reads <- as.numeric(readsta$total_reads)
+readsta$map_reads <- readsta$total_reads*readsta$map_reads_rate
+
+
+readsta$map_reads <- as.numeric(readsta$map_reads)
+
+readsta_long <- readsta %>%
+  select(sample, total_reads, map_reads) %>%
+  pivot_longer(cols = c(total_reads, map_reads),
+               names_to = "type",
+               values_to = "reads")
+
+# convert reads to million for matching y-axis
+readsta_long$reads <- readsta_long$reads / 1e6
+
+# remake the summary for barplot and errorbar
+readsum <- readsta_long %>%
+  group_by(type) %>%
+  summarise(mean_reads = mean(reads),
+            se = sd(reads) / sqrt(n()),
+            .groups = "drop") %>%
+  mutate(sample = case_when(
+    type == "total_reads" ~ "Total Reads",
+    type == "map_reads" ~ "Mapped Reads"
+  ))
+
+readsum$sample <- factor(readsum$sample, levels = c("Total Reads", "Mapped Reads"))
+readsta_long$sample_type <- factor(ifelse(readsta_long$type == "total_reads", "Total Reads", "Mapped Reads"),
+                                   levels = c("Total Reads", "Mapped Reads"))
+
+p1 <- ggplot(readsum, aes(x = sample, y = mean_reads)) +
+  geom_bar(stat = "identity", fill = c("#5272B2", "#5272B2"), width = 0.5) +
+  geom_jitter(data = readsta_long, aes(x = sample_type, y = reads),
+              width = 0.2, color = "black", size = 1.5) +
+  geom_errorbar(aes(ymin = mean_reads - se, ymax = mean_reads + se),
+                width = 0.1, color = "black") +
+  geom_text(aes(label = paste0(round(mean_reads), "M")),
+            vjust = -7.5, size = 5) +
+
+  ylab("Number of Reads x 10^6") + xlab("") + 
+  scale_y_continuous(expand = c(0, 0), limits = c(0, 550))+
+  theme_classic() +
+  theme(
+    axis.text.x = element_text(size = 15, color = "black"),
+    axis.text.y = element_text(size = 15, color = "black"),
+    axis.line = element_line(size = 1, linetype = 1, color = "black"),
+    axis.title.x = element_text(size = 15, color = "black"),
+    axis.title.y = element_text(size = 15, color = "black"),
+    legend.title = element_text(size = 15, color = "black")
+  )
+
+p1
+# ggsave(paste0(fig_dir,"fig2B_barplot_smp_map_reads_20240902.pdf"),plot = p1,width = 4,height =4,dpi = 300)
+```
+
+
+# Fig2C converted cytosine spike_in analysis
+
+```{r,fig.width=4,fig.height=6}
+## import data
+sp_in <- read_excel(paste0(proj,"ds_filter.xlsx"),sheet = "sp_in")
+sp_in$`sp_2kb_3-lambda` <- sp_in$`sp_2kb_3-lambda`*100
+sp_in$sp_lambda <- sp_in$sp_lambda *100
+sp_in$type <- factor(sp_in$type,levels = c("C","5mC"))
+
+## visualization for 2kb_3-lambda methylation conversion rate
+p2 <- ggplot(sp_in ,aes(x=type,y=sp_in$`sp_2kb_3-lambda`,fill = type)) +
+      geom_boxplot(outlier.shape = NA, color="#3d5da8", fill="white",lwd=1.5) +
+      geom_jitter(position = position_jitter(0.2),size=2.5,color = "black", alpha=1) +
+      ylab("Fraction of converted \n cytosine (%)")+
+      xlab("")+
+      ylim(0,100)+
+      theme_classic()+
+      theme(legend.position = "None",
+            axis.text.x = element_text(size = 15, color = "black"),  
+            axis.text.y = element_text(size = 15, color = "black"),
+            axis.title.y = element_text(size = 15, color = "black"),
+            axis.line = element_line(size=1,linetype = 1,color = "black"))
+      
+        
+# ggsave(paste0(fig_dir,"fig2A_boxplot_5mc_mod.pdf"),plot = p2,width = 4,height = 6,dpi = 300)
+print(p2)
+mc_data <- sp_in[39:76,]
+p3 <- ggplot(mc_data ,aes(x=type,y=mc_data$`sp_2kb_3-lambda`,fill = type)) +
+      geom_boxplot(outlier.shape = NA, color="#3d5da8", fill="white",lwd=1.5,width = 0.3) +
+      geom_jitter(position = position_jitter(0.2),size=2,color = "black", alpha=1) +
+      ylab("Fraction of converted \n cytosine (%)")+
+      xlab("")+
+      ylim(0,4)+
+      theme_classic()+
+      theme(legend.position = "None",
+            axis.text.x = element_text(size = 15, color = "black",),
+            axis.text.y = element_text(size = 15, color = "black",),
+            axis.title.y = element_text(size = 15, color = "black",),
+            axis.line = element_line(size=1,linetype = 1,color = "black"))
+        
+        
+# ggsave(paste0(fig_dir,"fig2A_boxplot_5c_mod.pdf"),plot = p3,width = 4,height = 6,dpi = 300)
+print(p3)
+```
+
+# Fig2E
+
+```{r}
+## import data
+cpg_data <- read_excel(paste0(proj,"ds_filter_update.xlsx"),sheet = "filter_sample_CpG_modified")
+cpg_data$smp_cpg_mod_rate <- cpg_data$smp_cpg_mod_rate*100
+cpg_data$stage <- factor(cpg_data$stage, levels = c("Control", "Early Stage", "Advanced Stage"))
+
+
+wilcox_test <- compare_means(smp_cpg_mod_rate~stage,cpg_data,paired = F ,method = "wilcox.test",p.adjust.method = "BH")
+
+p_adjust <- wilcox_test$p.adj[1:2]
+
+
+## make a boxplot 
+p4 <- ggplot(cpg_data, aes(x =stage, y = smp_cpg_mod_rate)) +
+        geom_boxplot(aes(fill=stage),outlier.shape = NA,lwd=0.6,alpha=0.5)+
+        geom_jitter(position=position_jitter(0.1), aes(colour=stage))+
+        theme_classic()+
+        ylim(65,79)+
+        scale_color_manual(values=c("#63A6D0","#F9A68A","#D34447"))+
+        scale_fill_manual(values=c("#63A6D0","#F9A68A","#D34447"))+
+        labs(x = "", y = "Genome modification (%)",lwd = 1.5)+
+        geom_signif(comparisons = list( c("Control", "Early Stage"),
+                                        c("Control", "Advanced Stage") ),
+        textsize = 6, p.signif = TRUE, annotations = c(paste0("p.adjust = ", round(p_adjust, 3))),
+              y_position =c(76, 78) ,vjust = -0.2)+
+        theme(
+          axis.text.x = element_text(size = 15, color = "black"),
+          axis.text.y = element_text(size = 15, color = "black"),
+          axis.title = element_text(size = 15,color = "black"),
+          legend.text = element_text(size = 15,color = "black"), 
+          legend.title = element_text(size = 15,color = "black"),
+          plot.title = element_text(size = 15,color = "black"),
+          axis.line = element_line(size = 1,linetype = 1,color = "black"),
+          legend.position = "none"
+          )
+# ggsave(plot = p4,filename=paste0(fig_dir,"fig2D_smp_modified_boxplot.pdf"),width = 8,height = 6,dpi = 300)
+print(p4)
+
+```
+
+# Technical
+
+```{r}
+sessionInfo()
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+

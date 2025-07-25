@@ -1,0 +1,976 @@
+---
+title: "FigSI"
+author: "Zhenna Jiao"
+date: "`r Sys.Date()`"
+output: html_document
+---
+# Load packages
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(ggplot2)
+library(readxl)
+library(ggpubr)
+library(stringr)
+library(readr)
+library(Rmisc)
+library(dplyr)
+library(smoother)
+library(reshape2)
+library(matrixStats)
+library(RColorBrewer)
+library(ComplexHeatmap)
+library(tidyr)
+```
+
+## Import the data directory
+
+```{r}
+fig_dir <- "~/methylation/project/EM_seq/analysis/technical/figure/fig2/"
+proj <- "~/methylation/project/EM_seq/data/metadata/"
+technical_dat_dir <- "~/methylation/project/EM_seq/analysis/technical/data/"
+meta_df <- readRDS("~/methylation/project/EM_seq/data/metadata/meta_df.rds")
+dat_dir <- "~/methylation/project/EM_seq/analysis/DMR_analysis/result/technical/"
+```
+
+## FigS6 A-B  Make a violin plot for the  input concentration of EV-DNA (EV-DNA in patients' plasma) and the coverage of  the DNA sequencing of the genome 
+
+```{r}
+## import data
+input_df <- read_excel(paste0(technical_dat_dir,"downsample.xlsx"),sheet = "downsample")
+
+dat <- input_df[,c(1,19:20)]
+rownames(dat) <- dat$sample_name...1
+colnames(dat) <- c("smp","plasma_conc","coverage")
+state <- dat$smp
+dat$status <- substr(state,1,2)%>%as.factor()
+dat$type <- c(rep("GP",21),rep("GC",23))%>%as.factor()
+p_value_cov <- wilcox.test(dat$coverage[1:21],dat$coverage[22:44])[["p.value"]]
+
+## Make a  plot for the difference between GP and GC  on the coverage of the genome  
+p7 <- ggplot(dat, aes(x =type, y =coverage,col=type)) +
+          geom_violin(aes(fill=type,alpha=0.5),scale="width")+
+          scale_fill_manual(values=c("#FB8D8D","#C0E1FF"))+
+          geom_boxplot(outlier.shape = NA,lwd=0.8,width=0.05)+
+          geom_jitter(position=position_jitter(0.1),aes(fill=type))+
+          scale_color_manual(values=c("#FB8D8D","#C0E1FF"))+
+          theme_classic()+
+          ylim(0,1)+
+          labs(x ="", y = "Coverage Rate", 
+                title = paste0("coverage rate between gp and gc ,the p.value is ",round(p_value_cov,3)))+
+          theme(axis.text.x = element_text(size = 15,colour = "black"),
+                axis.text.y = element_text(size = 15,colour = "black"),
+                axis.title = element_text(size = 15,colour = "black"),
+                axis.line = element_line(size=1,linetype = 1,color = "black"))
+   
+# ggsave(plot = p7,filename =paste0(fig_dir,"figS2F_1_downsample_sample_cov_20240902.pdf"),
+#        width = 8,height = 6 ,dpi = 300)
+        print(p7)
+
+## Make a  plot for the difference between GP and GC on the input concentration of EV-DNA   
+p_value_input <- wilcox.test(dat$plasma_conc[1:21],dat$plasma_conc[22:44])[["p.value"]]
+p8 <- ggplot(dat, aes(x =type, y =plasma_conc,col=type)) +
+          geom_violin(aes(fill=type,alpha=0.5),scale="width")+
+          scale_fill_manual(values=c("#FB8D8D","#C0E1FF"))+
+          geom_boxplot(outlier.shape = NA,lwd=0.8,width=0.05)+
+          geom_jitter(position=position_jitter(0.1), aes(fill=type))+
+          scale_color_manual(values=c("#FB8D8D","#C0E1FF"))+
+          theme_classic()+
+          labs(x =" ", y = "Input Concentration (ng/ml)", 
+             title = paste0("input concentration between gp and gc ,
+                            the p.value is ",round(p_value_input,3)))+
+          theme(axis.text.x = element_text(size = 15,colour = "black"),
+                axis.text.y = element_text(size = 15,colour = "black"),
+                axis.title = element_text(size = 15,colour = "black"),
+                axis.line = element_line(size=1,linetype = 1,color = "black"))
+       
+# ggsave(plot = p8,filename =paste0(fig_dir,"figS2F_downsample_sample_plasma_concentration_20240902.pdf"),
+# width = 8,height = 6 ,dpi = 300)
+print(p8)
+
+```
+
+## FigS7 A Bar plot showing the distribution of sample ages across control, early-stage, and advanced-stage groups.
+
+```{r,fig.width=8,fig.height=6}
+## import data
+age_gender_df <- read_excel(paste0(technical_dat_dir,"age_and_gender.xlsx"),sheet = "filter_sample")
+age_gender_df$Stage <- factor(age_gender_df$Stage, levels = c("Control", "Early Stage", "Advanced Stage"))
+## do boxplot
+p6 <-ggplot(age_gender_df, aes(x=Stage,y=Age))+
+    geom_boxplot(outlier.shape = NA,lwd=0.6,
+                 aes(fill=Stage),alpha=0.9)+
+    geom_jitter(position=position_jitter(0.1), 
+                aes(colour=Gender))+
+    theme_classic()+
+  labs(x = "", y = "Age",lwd = 1.5)+
+  ylim(0,100)+
+  scale_color_manual(values=c("#DE8686","#AACBFE"))+
+  scale_fill_manual(values = c("#63A6D0","#F9A68A","#D34447"))+
+  theme(axis.text.x = element_text(size = 15,colour = "black"),
+        axis.text.y = element_text(size = 15,colour = "black"),
+        axis.title = element_text(size = 15,colour = "black"),
+        axis.line = element_line(size=1,linetype = 1,color = "black"),
+          legend.text = element_text(size = 15), 
+          legend.title = element_text(size = 15), 
+          plot.title = element_text(size = 15),
+          legend.position = "right"
+        )
+# ggsave(plot = p6,filename = paste0(fig_dir,"figS2E_boxplot_age_gender.pdf"),width = 8,height = 6,dpi = 300)
+print(p6)
+```
+
+## FigS7 B  Methylation level variance  in 1-MB bins of the genome between GP and GC
+
+```{r}
+merge_df <- readRDS("~/methylation/project/EM_seq/analysis/technical/data/ds_1kb_count.rds")
+mat2<- merge_df
+meth<- merge_df
+meth$idx <- floor(meth$start / 1000000)  # generate index for each 1,000,000 bp bin
+meth[is.na(meth)]<-0
+meth<-sapply(meth[,-1], as.numeric)
+meth<-data.frame(meth)
+meth$Chr<-mat2$chr
+counts <- aggregate(meth[, grep("mC|nC|uC", colnames(meth))], by = list(meth$Chr, meth$idx), FUN=sum)  
+# calculate methylation
+for (indexmC in grep("_mC", colnames(counts))) { #index columns containing "_mC" in colname
+  indexuC <- grep(gsub("_mC", "_uC", colnames(counts)[indexmC]), colnames(counts)) #index columns with uC
+  m<-counts[,indexmC]/(counts[,indexuC]+counts[,indexmC])
+  n<-ncol(counts)
+  counts<-data.frame(counts,m)
+  colnames(counts)[n+1]<-gsub("_mC", "_mod", colnames(counts)[indexmC]) 
+}  
+autosomes<-c("chr1$","chr2$","chr3$","chr4$","chr5$","chr6$","chr7$","chr8$","chr9$","chr10$",
+             "chr11$","chr12$","chr13$","chr14$","chr15$","chr16$","chr17$","chr18$","chr19$","chr20$","chr21$","chr22$")
+
+# select autosomes
+counts<-counts[grep(paste(autosomes, collapse = "|"),counts$Group.1),]
+
+mod_df=counts[,grep("_mod",colnames(counts))]
+mod_df$pos<-paste(counts$Group.1, counts$Group.2, sep="_")
+mod_df<-mod_df[complete.cases(mod_df),]
+colnames(mod_df)<-gsub("_mod","",colnames(mod_df))
+
+GP <-mod_df[,grep("gp", colnames(mod_df))]
+rownames(GP)<-mod_df$pos
+
+GC <-mod_df[,grep("sc", colnames(mod_df))]
+rownames(GC)<-mod_df$pos
+GP.var <-rowVars(as.matrix(GP))
+GC.var<-rowVars(as.matrix(GC))
+var.df<-data.frame(mod_df$pos,GP.var,GC.var)
+var.df<-var.df%>%tidyr::separate(mod_df.pos,c("chr","pos"),"_")
+var.melt<-melt(var.df,id.vars = c("chr","pos"))
+
+chrOrder <-c("chr1","chr2","chr3","chr4","chr5","chr6","chr7","chr8","chr9","chr10","chr11",
+             "chr12","chr13","chr14","chr15","chr16","chr17","chr18","chr19","chr20",
+             "chr21","chr22")
+var.melt$chr <- factor(var.melt$chr, chrOrder, ordered=TRUE) 
+var.melt$status <- substr(var.melt$variable,1,2)
+var.melt$status <- factor(var.melt$status,level=c("GP","GC"))
+
+p5 <- ggplot(var.melt, aes(x =status, y =value)) +
+        geom_boxplot(aes(fill=status),outlier.shape = NA,
+                     lwd=0.7,alpha=0.8,width=0.5)+
+        theme_classic()+
+        ylim(0,0.001)+
+        scale_fill_manual(values=c("#FB8D8D","#C0E1FF"))+
+        labs(x = "", y = "Methylation variance",lwd = 1.5)+
+        theme(
+          axis.text.x = element_text(size = 15,hjust = 0.5,color = "black"),
+        axis.text.y = element_text(size = 15,hjust = 0.5,color = "black"),
+        axis.title.x = element_text(color = "black", size = 15),
+        axis.title.y = element_text(color = "black", size = 15),
+        axis.line = element_line(size=1,linetype = 1,color = "black"),
+          legend.text = element_text(size = 15), 
+          legend.title = element_text(size = 15), 
+          plot.title = element_text(size = 15),
+          legend.position = "none"
+          )
+print(p5)
+```
+
+## FigS7 C The distribution of %CpG modified level in 1-MB bins in different chromosomes
+
+```{r}
+## import data
+merge_df <- readRDS("~/methylation/project/EM_seq/analysis/technical/data/ds_1kb_count.rds")
+## Define the function to make a plot for the methylation level in 1-MB bins on different chromosomes 
+chr_variance <- function(data,chromosome){
+mat2 <- data
+ 
+mat<-mat2%>%dplyr::filter(chr==chromosome)
+# prepare 1-MB bins
+ws<-1000
+mat$bin<-c(1:nrow(mat))
+mat<-data.frame(mat)
+# index windows
+for (i in grep ("bin", colnames(mat))){
+  mat$index<-ceiling(mat[,i]/ws)
+}
+
+mat[is.na(mat)]<-0
+mat<-sapply(mat[,-1], as.numeric)
+mat<-data.frame(mat)
+mat.100kb<-aggregate(mat[, grep("uC|mC|nC", colnames(mat))],
+                     by = list(mat$index),
+                     FUN = sum)
+
+for (indexmC in grep("_mC", colnames(mat.100kb))) { #index columns containing "_mC" in colname
+  indexuC <- grep(gsub("_mC", "_uC", colnames(mat.100kb)[indexmC]), colnames(mat.100kb)) #index columns with uC
+  m<-mat.100kb[,indexmC]/(mat.100kb[,indexuC]+mat.100kb[,indexmC])
+  n<-ncol(mat.100kb)
+  mat.100kb<-data.frame(mat.100kb,m)
+  colnames(mat.100kb)[n+1]<-gsub("_mC", "_mod", colnames(mat.100kb)[indexmC]) 
+}  
+
+mod_df=mat.100kb[,grep("_mod",colnames(mat.100kb))]
+mod_df
+
+#smooth
+smooth<-data.frame(mat.100kb$Group.1)
+
+for (i in 1:ncol(mod_df)){
+  name<-colnames(mod_df)[i]
+  tmp<-mod_df[,i]
+  tmp.smooth<-smth.gaussian(tmp,
+                            window = 10,
+                            tails=TRUE,
+                            alpha=1)
+  n<-ncol(smooth)
+  smooth<-data.frame(smooth,tmp.smooth)
+  colnames(smooth)[n+1]<-name
+}
+
+healthy<-smooth[,grep("gp", colnames(smooth))]
+healthy$bin<-c(1:nrow(healthy))
+GC <-smooth[,grep("sc", colnames(smooth))]
+GC$bin<-c(1:nrow(GC))
+
+healthy.melt<-melt(healthy, id="bin")
+hcc.melt<-melt(GC,id="bin")
+colours=colorspace::sequential_hcl(30)
+p1<-ggplot(healthy.melt, aes(x=bin, y=value, colour=variable))+
+  geom_line()+
+  theme_classic()+
+  ggtitle("GP") +
+  xlab(paste0("Postion on ",chromosome,"(x10^6)")) +
+  ylab("Methylation value (%)")+
+  ylim(0.5,0.9)+
+  xlim(0,200)+
+  theme(legend.position = "none",
+        plot.title = element_text(hjust = 0.5, vjust = 0.5),
+        axis.text.x = element_text(size = 15,  hjust = 0.5,color = "black"),
+        axis.text.y = element_text(size = 15,hjust = 0.5,color = "black"),
+        axis.ticks.x = element_blank(),
+        axis.title.x = element_text(color = "black", size = 15),
+        axis.title.y = element_text(color = "black", size = 15),
+        axis.line = element_line(size=1,linetype = 1,color = "black"))
+# ggsave(plot = p1,filename = paste0(fig_dir,"figS2C1_GP_chr4_meth_dist.pdf"),
+#        width = 6,height = 4,dpi=300)
+print(p1)
+
+p2<-ggplot(hcc.melt, aes(x=bin, y=value, colour=variable))+
+  geom_line()+
+  theme_classic()+
+  ggtitle("GC") +
+  xlab(paste0("Postion on ",chromosome," (x10^6)")) +
+  ylab("Methylation value (%)")+
+  ylim(0.5,0.9)+
+  xlim(0,200)+
+  theme(legend.position = "none",
+         plot.title = element_text(hjust = 0.5, vjust = 0.5),
+        axis.text.x = element_text(size = 15,hjust = 0.5,color = "black"),
+        axis.text.y = element_text(size = 15,hjust = 0.5,color = "black"),
+        axis.ticks.x = element_blank(),
+        axis.title.x = element_text(color = "black", size = 15),
+        axis.title.y = element_text(color = "black", size = 15),
+        axis.line = element_line(size=1,linetype = 1,color = "black"))
+# ggsave(plot = p2,filename = paste0(fig_dir,"figS2C2_GC_chr4_meth_dist.pdf"),
+#        width = 6,height = 4,dpi = 300)
+print(p2)
+}
+
+
+## Plot the methylation level on chromosome 4
+i=4
+chr_variance(data = merge_df ,chromosome = paste0("chr",i))
+```
+
+## FigS7 D The distribution of %CpG modified level 
+
+```{r}
+## import data
+sample_names <- meta_df$sample_list
+smp_chr_data <- readRDS(paste0(dat_dir,"smp_chr_data.rds"))
+mod_count <- readRDS(paste0(dat_dir,"mod_count.rds"))
+df <- do.call(rbind, lapply(names(mod_count), function(name) mod_count[[name]]))
+df$mod <- df$mod/100
+
+df$bin<-NA
+df$bin<-ifelse(df$mod>=0 & df$mod<=0.1,1,
+               ifelse(df$mod>0.1 & df$mod<=0.2,2,
+                      ifelse(df$mod>0.2 & df$mod<=0.3,3,
+                             ifelse(df$mod>0.3 & df$mod<=0.4,4,
+                                    ifelse(df$mod>0.4 & df$mod<=0.5,5,
+                                           ifelse(df$mod>0.5 & df$mod<=0.6,6,
+                                                  ifelse(df$mod>0.6 & df$mod<=0.7,7,
+                                                         ifelse(df$mod>0.7 & df$mod<=0.8,8,
+                                                                ifelse(df$mod>0.8 & df$mod<=0.9,9,
+                                                                       ifelse(df$mod>0.9 & df$mod<=1,10,NA))))))))))
+
+df$status<-NA
+df$status[grep("gp",df$name)]<-"GP"
+df$status[grep("sc",df$name)]<-"GC"
+# df<-df[-grep("GP|GC", df$name),]
+df$name<-as.character(df$name)
+df<-aggregate(count ~ bin + name, FUN=sum, data=df)
+sums<-aggregate(df$count, by=list(df$name), FUN=sum)
+colnames(sums)<-c("name","total")
+df <- merge(x = df, y = sums, by = "name")
+df$freq<-(df$count/df$total)*100
+
+df$status<-NA
+df$status[grep("gp",df$name)]<-"GP"
+df$status[grep("sc",df$name)]<-"GC"
+# df$status[grep("Healthy_",df4$name)]<-"Healthy"
+
+df2<-aggregate(freq ~ bin + status, FUN=mean, data=df)
+df2$status<-factor(df2$status, levels=c("GP","GC"), ordered=TRUE) 
+
+df$mean_freq<-NA
+df3 <- df %>% right_join(df2, by=c("bin","status"))
+df3$status<-factor(df3$status, levels=c("GP","GC"), ordered=TRUE)
+
+## do histogram plot 
+b.mod_gp <- ggplot(df3[df3$status == "GP",]) +
+  geom_bar(aes(x=bin, y=freq.y), position="identity", stat="identity", color="black", fill="#C0E1FF") +
+  geom_line(aes(x=bin, y=freq.x, colour=name), position="identity", stat="identity") +
+  theme_classic() +
+  ggtitle("GP")+
+  ylab("% of modified CpG sites") +
+  xlab("Modification level (%)")+
+  # facet_wrap(~ status,scales = "free_x") +
+  theme(legend.position = "none", 
+        strip.text = element_text(face = "bold", size = 15, color = "black", angle = 0),
+        strip.background = element_blank(), 
+        axis.text.x = element_text(size = 15, angle = 90, hjust = 0.5,color = "black"),
+        axis.text.y = element_text(size = 15,hjust = 0.5,color = "black"),
+        axis.ticks.x = element_blank(),
+        axis.title.x = element_text(color = "black", size = 15),
+        axis.title.y = element_text(color = "black", size = 15),
+        axis.line = element_line(size=1,linetype = 1,color = "black"),
+        plot.title = element_text(hjust = 0.5)) +
+        scale_x_continuous(breaks = seq(1, 10, by = 1),
+                      labels = c( "0-10", "10-20", "20-30", "30-40", 
+                                  "40-50", "50-60", "60-70", "70-80", "80-90", "90-100"))
+
+# ggsave(paste0(fig_dir,"figS2A_plot_GP_mod_level.pdf"),plot = b.mod_gp,width = 4,height =4,dpi = 300)
+print(b.mod_gp)
+
+b.mod_gc <- ggplot(df3[df3$status == "GC",]) +
+  geom_bar(aes(x=bin, y=freq.y), 
+           position="identity", stat="identity", color="black", fill="#FB8D8D") +
+  geom_line(aes(x=bin, y=freq.x, colour=name), 
+            position="identity", stat="identity") +
+  theme_classic() +
+  ylab("% of modified CpG sites") +
+  xlab("Modification level (%)")+
+  ggtitle("GC")+
+  # facet_wrap(~ status,scales = "free_x") +
+  theme(legend.position = "none", strip.text = element_text(face = "bold", size = 15, color = "black", angle = 0),
+        strip.background = element_blank(), 
+        axis.text.x = element_text(size = 15, angle = 90, hjust = 0.5,color = "black"),
+        axis.text.y = element_text(size = 15,hjust = 0.5,color = "black"),
+        axis.ticks.x = element_blank(),
+        axis.title.x = element_text(color = "black", size = 15),
+        axis.title.y = element_text(color = "black", size = 15),
+        axis.line = element_line(size=1,linetype = 1,color = "black"),
+        plot.title = element_text(hjust = 0.5)) +
+        scale_x_continuous(breaks = seq(1, 10, by = 1),
+                        labels = c( "0-10", "10-20", "20-30", "30-40",
+                                    "40-50", "50-60", "60-70", "70-80", "80-90", "90-100"))
+
+
+# ggsave(paste0(fig_dir,"figS2A_plot_GC_mod_level.pdf"),plot = b.mod_gc,width = 4,height =4,dpi = 300)
+print(b.mod_gc)
+```
+
+## FigS8 A  Create a heatmap to visualize the correlation of methylation levels across DMRs detected between early and advanced stages.
+
+```{r,fig.width=14,fig.height=10}
+## set fig_stored dir
+fig_dir <- "~/methylation/project/EM_seq/analysis/DMR_analysis/figures/figS5-6/"
+meta_scstage_df <- readRDS("~/methylation/project/EM_seq/data/metadata/meta_scstage_df.rds")
+sc_dat_dir <- "~/methylation/project/EM_seq/analysis/DMR_analysis/data/filter_sample/scstage_dmr_change/"
+## import sc_satge data
+scstage_DMR_meth <- readRDS(paste0(sc_dat_dir,"scstage_DMR_change_meth.rds"))
+## calculate Pearson correlation coefficient matrix
+
+data_keep_na <-  scstage_DMR_meth
+row.names(data_keep_na) <- as.character(scstage_DMR_meth$chr_region)
+data_keep_na <- data_keep_na[,-1]
+colnames(data_keep_na) <- meta_scstage_df$smp
+DMR_cor_keep_na <- cor(data_keep_na,use = "pairwise.complete.obs")
+annotation_col_keepna <- data.frame(Stage=meta_scstage_df$stage,Gender=meta_scstage_df$gender)
+DMR_cor_df_keepna <- as.data.frame(DMR_cor_keep_na)
+rownames(annotation_col_keepna)  <- colnames(DMR_cor_df_keepna)
+
+my_color=c("#4675FE","white","#F9A68A","#D34447")
+
+gender_color=list(Gender=c(Male="#AACBFE",Female="#DE8686"))
+stage_color=list(Stage=c("Early Stage"="#F9A68A","Advanced Stage"="#D34447"))
+
+# pdf(paste0(fig_dir,"figS5A_heatmap_scstage_dmr_cor.pdf"),width = 14,height = 10)
+pheatmap::pheatmap(DMR_cor_df_keepna,cluster_rows = T ,cluster_cols =T,show_rownames = T,show_colnames = T,
+                   annotation_col = annotation_col_keepna,
+                   annotation_colors = c(gender_color,stage_color),
+                   scale = "none",
+                  fontsize = 15,                
+                  fontsize_row = 15,             
+                  fontsize_col = 15,
+                   cellwidth = 13,
+                  cellheight =12,
+                  color = colorRampPalette(my_color)(100))
+
+# dev.off()
+```
+
+## FigS8 B Perform PCA analysis on DMRs called between the Early and Advanced Stages
+
+```{r}
+## import  data,  remove missing value
+dat_rm_na <- scstage_DMR_meth%>%na.omit()
+## Convert data format
+rownames(dat_rm_na) <- as.character(dat_rm_na$chr_region)
+dat_rm_na <- dat_rm_na[, -1]
+tr_data <- t(dat_rm_na)
+rownames(tr_data) <- colnames(dat_rm_na)
+colnames(tr_data) <- rownames(dat_rm_na)
+tr_data <- as.data.frame(tr_data)
+tr_data$sample_stage <- meta_scstage_df$stage %>% as.factor()
+
+## calculate PCs
+tr.pca_all <- prcomp(tr_data[,1:(length(tr_data)-1)])
+
+## do plot 
+df1 <- tr.pca_all$x
+pc_one <- as.data.frame(df1,tr_data$sample_stage)
+pc_one$Stage <- tr_data$sample_stage
+pc_one$smp_name <- substr(rownames(tr_data),1,4)
+#Extract the variance contribution rate of the principal components and generate axis titles；
+summ<-summary(tr.pca_all)
+xlab<-paste0("PC1(",round(summ$importance[2,1]*100,2),"%)")
+ylab<-paste0("PC2(",round(summ$importance[2,2]*100,2),"%)")
+p1 <-ggplot(data = pc_one,aes(x=PC1,y=PC2,color=Stage))+
+  geom_point(size=4.5)+
+  labs(x=xlab,y=ylab)+
+  theme_classic()+
+  scale_color_manual(values = c("#D34447", "#F9A68A"))+
+  theme(axis.text.x = element_text(size = 15),
+        axis.text.y = element_text(size = 15),
+        axis.text = element_text(size = 15,colour = "black"),
+        axis.line.x = element_line(size = 1,linetype = 1,colour = "black"),
+        axis.line.y = element_line(size = 1,linetype = 1,colour = "black"),
+        axis.title = element_text(size = 15,colour = "black"))
+ 
+
+# ggsave(paste0(fig_dir,"figS6_PCA_scstage_dmr_removena.pdf"),plot = p1,width = 8,height = 5,dpi = 300)
+print(p1)
+```
+
+## FigS8 C 
+
+```{r}
+proj_dir <- "~/methylation/project/EM_seq/analysis/DMR_analysis/result/annotation_dmr/"
+dat_sc <- read_excel(paste0(proj_dir,"dmr_features.xlsx"),sheet = "scstage_dmr_feature_fisher")
+dat_sc$logp <- -log(dat_sc$two_tail,10)
+p4 <- ggplot(dat_sc, aes(y= elments, x= logp)) +
+      geom_bar(stat = "identity",fill="#F9A68A",color = "#F9A68A", width = 0.8) +
+      theme_classic()+
+      ylab("-log10(Pvalue)") +
+      xlab("")+
+      xlim(0,300)+
+      theme(axis.text.x = element_text(size = 15),
+            axis.text.y = element_text(size = 15),
+            axis.text = element_text(size = 15,colour = "black"),
+            axis.line.x = element_line(size = 1,linetype = 1,colour = "black"),
+            axis.line.y = element_line(size = 1,linetype = 1,colour = "black"),
+            axis.title.x = element_text(size = 15,colour = "black"))
+# ggsave(paste0(fig_dir,"lolipop_scstage_dmr_20240722.pdf"),plot = p4,width = 7,height = 4,dpi = 300)
+print(p4)
+```
+## Figure S9 S10 S11 The same analysis process is shown in Figure 3E 3F
+
+## Figure S12 C-F The same analysis process is shown in Figure 4A
+## Figure S14  The same analysis process is shown in Figure 3 G-H
+## Figure S15 The same analysis process is shown in Figure 4A
+
+## Figure S16 2025-07-23 the lasted modified 
+
+```{r}
+## load data 
+work_dir <- "~/methylation/project/EM_seq/analysis/DMR_analysis/data/figS5-6_dat/"
+meta_scstage_df <- readRDS("~/methylation/project/EM_seq/data/metadata/meta_scstage_df.rds")
+scstage_go_element <-read.csv(paste0(work_dir,"scstage_element_go4_meth.csv"))
+scstage_speci_go_dup_genes <- read.csv(paste0(work_dir,"scstage_speci4_go_dup_gene_meth.csv"))
+
+## 
+meta_scstage_df <- meta_scstage_df %>% mutate(sample_names=str_replace_all(sample,"GC","sc"))
+meta_scstage_df$sample_list <- meta_scstage_df$sample_names
+meta_scstage_df <- meta_scstage_df %>% mutate(sample_names=str_replace_all(sample_names,"-","."))
+###
+
+## check the duplication gene 
+scstage_speci_go_dup_genes$term_gene <-  paste0(scstage_speci_go_dup_genes$Term,"_",scstage_speci_go_dup_genes$Genes)
+
+## merge dup_term_gene to the orignal gene dataframe 
+merged_df <- merge(scstage_go_element, scstage_speci_go_dup_genes, by = "Genes", all.x = TRUE)
+
+merged_df_filter <- merged_df[,c(1,2,10,11,12,36,44)]
+
+merged_df_filter$new_col <- apply(merged_df_filter[, c(3,4,5,1)], 1, function(x) paste(x, collapse = "_"))
+
+
+merged_df_filter <- merged_df_filter %>%
+  mutate(term_gene = if_else(is.na(term_gene) | term_gene == "NA", Term.x, term_gene))
+
+library(dplyr)
+df_new <- merged_df_filter  %>%
+  group_by(new_col, Genes) %>% 
+  summarise(go_terms = paste(unique(term_gene), collapse = "; "), .groups = "drop")
+
+print(df_new)
+df_new$Genes <- factor(df_new$Genes, levels = order_name)
+sorted_df_new <- df_new %>% arrange(Genes)
+```
+
+```{r}
+## 
+scstage_go_element[,c(10,11,12,9)] <- lapply(scstage_go_element[,c(10,11,12,9)], as.character)
+scstage_go_element$new_col <- apply(scstage_go_element[, c(10,11,12,9)], 1, function(x) paste(x, collapse = "_"))
+h_dat <- scstage_go_element[scstage_go_element$p_adjust<0.05,]
+```
+
+```{r,fig.height=20,fig.width=20}
+
+order_name <- c("CDH11","CDH13",##in 4 GO term
+                "CDH10", "CDH18", "CDH2", "CDH26","CDH4", "CDH6" ,"CDH7" ,"CDH8", "CDH9",## 3GO term
+                "PARD6B","TJP1",#3GO term
+               "ADGRL3", "DSCAM", "PCDHB14","SDK2", "SLITRK1",##2GO term
+               "CLDN11",
+              "CTNND2","PKP2",
+               "PRKCA",
+               "PTPRT",## GO dup gene
+              "TENM2","TENM3","EMB","LRRC4C","GRID2","CADM2",
+              "CNTN6","UNC5D","IGSF11","PTPRD","LRFN5","CNTN4","NECTIN1",
+              "SLITRK6","WDR1","GJA1","CD9","PTPRU","CLIC4","PTPRJ","MYLK","IGF1R",  
+              "DACH1","DUSP10","FGF9","ARID2","PDGFRA","EDN1","ANXA1","HGF","MITF","TIAM1","TMEFF2", 
+              "SFRP1","RAP2B","SPATA13","SINHCAF","SGK1","KANK1","LEF1","CXCR4","EGFR","SDCBP", 
+              "ERBB4","PDGFD","MGAT5","PDGFC","FYN","CTNNA2","PLXNA4","TCAF2","XBP1","HACE1",  
+             "YTHDF3","SULF1","TBX5","CXCL12","STK24","SNAI2","SPRY2","LGR6")
+
+h_dat$Genes <- factor(h_dat$Genes, levels = order_name)
+sorted_h_dat <- h_dat %>% arrange(Genes)
+
+## add region elemnet information 
+sorted_h_dat$elemnets[is.na(sorted_h_dat$elemnets)] <- "None"
+
+sorted_go_dat <- sorted_h_dat[,c(1,9,14:36)]
+sorted_h_dat[27,36] <- "chr4_61983982_61984475_ADGRL3_1"
+sorted_h_dat[31,36] <- "chr17_73698076_73698175_SDK2_1"
+sorted_h_dat[100,36] <- "chr8_58534885_58535347_SDCBP_1"
+
+rownames(sorted_go_dat) <- sorted_h_dat$new_col
+heatmap_dat <- sorted_go_dat[,c(3:23)]%>%as.matrix()
+
+## pull sample names according to gender
+sc_male <-meta_scstage_df %>% 
+  filter(gender=="Male")%>%
+  pull(sample_names)
+
+sc_female <-meta_scstage_df %>% 
+  filter(gender=="Female")%>%
+  pull(sample_names)
+heat_male_dat <- heatmap_dat[,sc_male,drop=FALSE]
+heat_female_dat <- heatmap_dat[,sc_female,drop=FALSE]
+sc_male_df <- meta_scstage_df[meta_scstage_df$sample_names%in%sc_male,]
+sc_female_df <- meta_scstage_df[meta_scstage_df$sample_names%in%sc_female,]
+
+status_colors <- c("Control" = "#63A6D0", "Early Stage" = "#F9A68A", "Advanced Stage" = "#D34447")
+gender_colors <- c("Male" = "#AACBFE", "Female" = "#DE8686")
+my_color=c("#4675FE","#F9F5C9","#FCA605")
+ann_sc_male <- HeatmapAnnotation(Status=sc_male_df$stage,
+                                  Gender=sc_male_df$gender,
+                                  annotation_name_side = "left",
+                                 annotation_name_gp = gpar(fontsize = 0),
+                                  col=list(
+                                  Status = status_colors,
+                                  Gender = gender_colors))
+ann_sc_female <- HeatmapAnnotation(Status=sc_female_df$stage,
+                                  Gender=sc_female_df$gender,
+                                  annotation_name_side = "right",
+                                  col=list(
+                                  Status = status_colors,
+                                  Gender = gender_colors))
+sorted_h_dat$elemnets <- as.factor(sorted_h_dat$elemnets)
+## Save the output data
+sorted_h_dat_output <- sorted_h_dat[,c(1,9:12,14:35)]
+sorted_h_dat_output$chr_region <- paste0(sorted_h_dat_output$Chr,"_",sorted_h_dat_output$Start,"_",sorted_h_dat_output$End)
+
+sorted_h_dat_output <- sorted_h_dat_output[,c(28,1:2,27,6:26)]
+# write.csv(sorted_h_dat_output,paste0(fig_data,"figS11_gene_region.csv"))
+
+row_enhancer <- c("None"="#F2F2F2","CTCF_binding_site"="#8DD3C7","enhancer"="#BEBADA",
+                  "open_chromatin_region"="#FB8072","promoter"="#80B1D3","TF_binding_site"="#CCEBC5")
+row_ann_element <- rowAnnotation(Elements=sorted_h_dat$elemnets,col=list(Elements=row_enhancer))
+row_groups <- c(rep("GO:0098742;GO:0034329;GO:0007043;GO:0030334", 3),
+                rep("GO:0098742;GO:0034329;GO:0007043",18),
+                rep("GO:0034329;GO:0007043;GO:0030334",3),
+                rep("GO:0098742;GO:0034329",9),
+                rep("GO:0098742;GO:0007043",5),
+                rep("GO:0007043;GO:0030334",1),
+                rep("GO:0098742;GO:0030334",2),
+                rep("GO:0098742",26),
+                rep("GO:0034329",1),
+                rep("GO:0007043",3),
+                rep("GO:0030334",53))
+row_annot <- rowAnnotation(GO = row_groups,
+                           col = list(
+                           GO=c("GO:0034329"="#F9F5C9",
+                                "GO:0030334"= "#63A6D0",
+                                "GO:0007043"="#4675FE",
+                                "GO:0098742"="#DE8686",
+                                "GO:0007043;GO:0030334"="#6C040F",
+                                "GO:0034329;GO:0007043;GO:0030334"="#FCBC85",
+                                "GO:0098742;GO:0034329"="#F96949",
+                                "GO:0098742;GO:0007043" ="#FCEBDE",
+                                "GO:0098742;GO:0030334"="#AACBFE",
+                                "GO:0098742;GO:0034329;GO:0007043" = "#FC8B39",
+                                "GO:0098742;GO:0034329;GO:0007043;GO:0030334" = "#D94500")),                         
+                                annotation_legend_param = list(
+                                  GO = list(
+                                    at=c(
+                                    "GO:0034329",
+                                    "GO:0030334",
+                                    "GO:0007043",
+                                    "GO:0007043;GO:0030334",
+                                    "GO:0098742",
+                                    "GO:0034329;GO:0007043;GO:0030334",
+                                    "GO:0098742;GO:0034329",
+                                    "GO:0098742;GO:0007043",
+                                    "GO:0098742;GO:0030334",
+                                    "GO:0098742;GO:0034329;GO:0007043",
+                                    "GO:0098742;GO:0034329;GO:0007043;GO:0030334"
+                                  ),
+labels=c("Cell Junction Assembly",
+         "Regulation Of Cell Migration",
+         "Cell-Cell Junction Assembly",
+         "Cell-Cell Junction Assembly;Regulation Of Cell Migration",
+         "Cell-Cell Adhesion Via Plasma-Membrane Adhesion Molecules",
+         "Cell Junction Assembly;Cell-Cell Junction Assembly;Regulation Of Cell Migration",
+         "Cell-Cell Adhesion Via Plasma-Membrane Adhesion Molecules;Cell Junction Assembly",
+         "Cell-Cell Adhesion Via Plasma-Membrane Adhesion Molecules;Cell-Cell Junction Assembly",
+         "Cell-Cell Adhesion Via Plasma-Membrane Adhesion Molecules;Regulation Of Cell Migration",
+         "Cell-Cell Adhesion Via Plasma-Membrane Adhesion Molecules;Cell Junction Assembly;Cell-Cell Junction Assembly",
+"Cell Junction Assembly;Cell-Cell Junction Assembly;Regulation Of Cell Migration;Cell-Cell Adhesion Via Plasma-Membrane Adhesion Molecules")
+)
+))
+###
+heat_map_1 <- Heatmap(heat_male_dat,
+                      cluster_rows = T,
+                      cluster_columns = T,
+                      row_split = row_groups,
+                      # right_annotation = c(row_annot,row_ann_element),
+                      top_annotation =ann_sc_male ,
+                      show_column_names = F,
+                     show_row_dend = F,
+                     show_row_names = T,
+                     row_title = NULL,
+                    col = colorRampPalette(my_color)(100),
+                    na_col = "white",
+                    show_heatmap_legend = FALSE,
+                     border_gp = gpar(col = "NA"),
+                    width =unit(20,"cm"),
+                     height = unit(40,"cm")
+                      )
+
+heat_map_2 <- Heatmap(heat_female_dat,
+                      cluster_rows = T,
+                      cluster_columns = T,
+                      row_split = row_groups,
+                      right_annotation = c(row_annot,row_ann_element),
+                      top_annotation = ann_sc_female,
+                      show_column_names = F,
+                     show_row_dend = F,
+                     show_row_names = T,
+                     row_title = NULL,
+                    col = colorRampPalette(my_color)(100),
+                    na_col = "white",
+                    width =unit(10,"cm"),
+                     height = unit(40,"cm")
+                      )
+
+p <- heat_map_1+heat_map_2
+p
+# pdf(paste0(fig_dir,"figS11_scstage_topGO_go_genes_20250325.pdf"),width = 25,height = 35)
+# draw(p, heatmap_legend_side = "bottom", annotation_legend_side = "bottom")
+# 
+# dev.off()
+
+```
+
+
+
+## FigS17 A-B Make violin plot of scstage_dmr associated gene
+
+```{r,echo=TRUE}
+## import data
+
+gene_dat <- "~/methylation/project/EM_seq/analysis/DMR_analysis/result/scstage_change_ann/"
+fig_dir <- "~/methylation/project/EM_seq/TEMPT-paper-codes/DMR_meth_scstage_fig/"
+smp_scsatge_list <- meta_scstage_df$sample_list
+
+smp_scstage_DMR_meth <- read.table(paste0(sc_dat_dir,"scstage_dmr_change_region.sorted.txt"),col.names = "chr_region")
+smp_scstage_DMR_cov <- read.table(paste0(sc_dat_dir,"scstage_dmr_change_region.sorted.txt"),col.names = "chr_region")
+
+for (i_sample in smp_scsatge_list){
+  a <- read.table(paste0(sc_dat_dir,i_sample,"_sc_dmr.calc.bed"),col.name = c("chromosome","start","end","mod","unmod","meth_level"))
+
+ smp_scstage_DMR_meth[[i_sample]] <- a$meth_level
+ smp_scstage_DMR_cov[[i_sample]] <- a$mod+a$unmod
+}
+## scstage_meth_dmr 2414 dmr_region
+scstage_meth_dmr <- read.csv(paste0(gene_dat,"scstage_meth_data.csv"))
+scstage_meth_dmr$p_adjust <- as.numeric(scstage_meth_dmr$p_adjust)
+scstage_dat_ann <- scstage_meth_dmr
+
+## trans data format
+scstage_dat_ann[,c(1:5)] <- lapply(scstage_dat_ann[,c(1:5)], as.character)
+scstage_dat_ann$chr_region <- apply(scstage_dat_ann[,c(1:3)], 1, function(x) paste(x,collapse = "_"))
+scstage_dat_ann$gene_region <-  apply(scstage_dat_ann[, c(1:5)], 1, function(x) paste(x, collapse = "_"))
+## define scstage_dmr gene annotated
+scstage_dmr_ann <- scstage_dat_ann[,c(27,28,6:26)]
+
+## merge data
+merge_scstage_meth_ann <- merge(scstage_dmr_ann,smp_scstage_DMR_meth,by="chr_region")
+scstage_meth_ann <- merge_scstage_meth_ann[,c(2,24:44)]
+
+merge_scstage_cov_ann <- merge(scstage_dmr_ann,smp_scstage_DMR_cov,by="chr_region")
+scstage_cov_ann <- merge_scstage_cov_ann[,c(2,24:44)]
+
+## sc stage methylation level matrix 
+data <- scstage_meth_ann
+rownames(data) <- as.character(data$gene_region)
+data <- data[, -1]
+tr_data <- t(data)
+rownames(tr_data) <- colnames(data)
+colnames(tr_data) <- rownames(data)
+tr_data_meth <- as.data.frame(tr_data)
+
+## sc stage coverage in DMRs 
+data_cov <- scstage_cov_ann
+rownames(data_cov) <- as.character(data_cov$gene_region)
+data_cov <- data_cov[, -1]
+tr_data_co <- t(data_cov)
+rownames(tr_data_co) <- colnames(data_cov)
+colnames(tr_data_co) <- rownames(data_cov)
+tr_data_cov <- as.data.frame(tr_data_co)
+##
+
+common_cols <- intersect(names(tr_data_cov), names(tr_data_meth))
+count=0
+
+p_value <- list()
+## 
+for (col in common_cols) {
+  df <- data.frame(x = tr_data_cov[[col]], y = tr_data_meth[[col]]) 
+  df$status <- meta_scstage_df$stage
+  df$smp <- str_sub(rownames(tr_data_cov),1,4)
+  df <- na.omit(df)
+  ## do scatter plot 
+    wilcox_test <- wilcox.test(df$y[df$status=="Early Stage"],df$y[df$status=="Advanced Stage"],paired = FALSE)
+    p.value <- wilcox_test$p.value
+    p_value[[col]] <- p.value
+  if(!is.na(p.value)&&p.value< 0.05&&length(p.value)!=0){ 
+        p1 <- ggplot(df, aes(x = status, y = y)) +
+              geom_violin(aes(fill=status,alpha=1),scale="width") +
+              scale_fill_manual(values =c("#D34447", "#F9A68A"))+
+              geom_boxplot(aes(fill=status),
+                            outlier.shape = NA,lwd=0.4,width=0.05)+
+              scale_fill_manual(values =c("#FB4F4F", "#FE7E2A"),guide = 'none')+
+                geom_jitter(aes(fill = status),
+                          position = position_jitterdodge(jitter.width = 0.3, dodge.width = 0.8),
+                          size = 3, shape = 21,)+
+              labs(y ="Methylation level", x = paste("y_", col), title = paste0("p = ", round(p.value, 10)))+
+              theme_classic()+
+              theme(axis.text.x = element_text(size = 15),
+                    axis.text.y = element_text(size = 15),
+                    axis.text = element_text(size = 15,colour = "black"),
+                    axis.line.x = element_line(size = 1,linetype = 1,colour = "black"),
+                    axis.line.y = element_line(size = 1,linetype = 1,colour = "black"),
+                    axis.title = element_text(size = 15,colour = "black"),
+                    legend.position="none")
+        # ggsave(plot = p1,
+        #           filename =paste0(fig_dir,"meth_",col,"_violin_plot.pdf"),
+        #        width = 6,height = 4,dpi = 300)
+        print(p1)
+         }else{
+             print(paste0(col,"_wilcox p.adjust less than 0.05,and the p is ",p.value))
+            count=count+1 }
+          print(count)
+ }
+
+```
+
+## Figure S18 A-B 
+
+```{r}
+# Tissue contribution ----
+filename <- "~/methylation/project/EM_seq/analysis/deconv_analysis/TAPS_data/data/sample_mixtures.csv"
+dat <- read.table(filename, header=TRUE, stringsAsFactors=FALSE, sep="\t")
+fig_dir <- "~/methylation/project/EM_seq/analysis/deconv_analysis/TAPS_data/figure/"
+
+dat.m <- melt(dat,id.vars=c("atlas_tissues"))
+dat.m$atlas_tissues[dat.m$atlas_tissues %in% c("immature neutrophil","mature neutrophil")] <- "neutrophil"
+dat.m$atlas_tissues[dat.m$atlas_tissues %in% c("immature conventional dendritic cell","mature conventional dendritic cell")] <- "dendritic cell"
+a <- dat.m
+dat.m <- aggregate(dat.m$value, by=list(Category=dat.m$variable, dat.m$atlas_tissues ), FUN = sum) %>% as.data.frame()
+colnames(dat.m) <- c("variable","atlas_tissues","value")
+dat.m$Type <- substr(dat.m$variable,1,2)
+dat.m$Type <- recode(dat.m$Type,"sc"="Cancer","gp"="Benign")
+
+tissue_group <- aggregate(dat.m$value, by=list(Category=dat.m$Type,dat.m$atlas_tissues ), FUN = mean) %>% as.data.frame()
+colnames(tissue_group) <- c("status","tissue","value")
+
+tissue_contribution_pie_plot <- function(type,clor){
+  
+  seldat <- tissue_group[tissue_group$status== type,]
+  seldat$tissue[seldat$value<=0.015] <- "Other"
+  seldat <- aggregate(seldat$value, by=list(Category=seldat$status,seldat$tissue ), FUN = sum) %>% as.data.frame()
+  colnames(seldat) <- c("status","tissue","value")
+  seldat$value <- round(seldat$value,2) * 100
+  seldat <- seldat[order(seldat$value),]
+  seldat$tissue <- factor(seldat$tissue,levels=seldat$tissue)
+  seldat <- seldat %>%
+    arrange(desc(tissue)) %>%
+    mutate(lab.ypos = cumsum(value) - 0.5*value)
+  nb.cols <- nrow(seldat)
+if (clor=="Cancer") {
+    ## define GC tissues and paired color 
+    mycolors <- c("neutrophil"="#8DD3C7","spleen"="#FFFFB3","dendritic cell"="#BEBADA",
+                
+                "Thymus"="#FB8072","macrophage"="#80B1D3","monocyte"="#FDB462",
+                
+               "osteoclast"="#B3DE69","plasma_cell"="#FCCDE5","liver"="#66C2A5",
+               
+                "intestine"="#FFD92F","Other"="#B3B3B3")
+  
+  }else if (clor=="Benign") {
+     ## define GP tissues and paired color 
+ mycolors <- c("neutrophil"="#8DD3C7","spleen"="#FFFFB3","dendritic cell"="#BEBADA","monocyte"="#FDB462",
+                
+                "Thymus"="#FB8072","Other"="#B3B3B3","osteoclast"="#B3DE69", "macrophage"="#80B1D3",
+               
+                
+               "naive_tcell"= "#E78AC3" ,"lung"="#4DAF4A",
+               
+                "heart"="#F0027F" )
+  }else{
+        stop("Error: Typo! GC or GP label expected!")
+}    
+
+  p <- ggplot(data = seldat, aes(x = "", y = value, fill = tissue)) + 
+          geom_bar(width = 1, stat = "identity", color = "white") +
+          coord_polar("y", start = 0)+
+          geom_text(aes(y = lab.ypos, label = value), color = "white",size=3) +
+          scale_fill_manual(values = mycolors) +
+          theme_void() +
+          ggtitle(type)
+
+}
+
+ p1 <- tissue_contribution_pie_plot("Cancer","Cancer")
+ 
+ print(p1)
+ p2 <- tissue_contribution_pie_plot("Benign","Benign")
+ print(p2)
+```
+
+## Figure S18 C-D
+
+```{r}
+## load data 
+meta_df <- readRDS("~/methylation/project/EM_seq/data/metadata/meta_df.rds")
+sample_list <- meta_df$sample_list
+dat_dir <- "~/methylation/project/EM_seq/analysis/deconv_analysis/TAPS_data/data/"
+fig_dir <- "~/methylation/project/EM_seq/TEMPT-paper-codes/Too_FIGS_20250722/"
+
+sample_mixtures <- read.csv(paste0(dat_dir,"sample_mixtures.csv"),sep = "\t")
+df_1 <- sample_mixtures
+col_value <- colnames(df_1)[2:39]
+
+long_df_1 <- df_1%>%pivot_longer(cols =col_value,names_to = "sample",values_to = "probility")
+long_df_1$smp_type <- substr(long_df_1$sample,1,2)
+long_df_1 <- long_df_1%>%mutate(smp_type=recode(smp_type, "sc" = "GC", "gp" = "GP"))
+
+long_df_1$smp_type <- as.factor(long_df_1$smp_type)
+
+plots <- list()
+p_value <- list()
+ #i=19
+for (i in unique(long_df_1$atlas_tissues)){
+
+df_1 <- long_df_1[long_df_1$atlas_tissues==i,]
+wilcox_rls <- wilcox.test(df_1$probility[df_1$smp_type == "GC"], 
+                          df_1$probility[df_1$smp_type == "GP"],exact = FALSE)
+p.val <- wilcox_rls$p.value
+
+mean_fold_change_GC <- mean(df_1$probility[df_1$smp_type == "GC"])/mean(df_1$probility[df_1$smp_type == "GP"])
+mean_fold_change_GP <- mean(df_1$probility[df_1$smp_type == "GP"])/mean(df_1$probility[df_1$smp_type == "GC"])
+
+print(paste0("Mean ",i," fold change GC/GP is ",round(mean_fold_change_GC,3)))
+print(paste0("Mean ",i," fold change GP/GC is ",round(mean_fold_change_GP,3)))
+
+##do violin plot 
+plot <- ggplot(df_1, aes(x = smp_type, y = probility)) +
+  geom_violin(aes(fill=smp_type,alpha=1),scale = "width") +
+  scale_fill_manual(values =c("#FC9595", "#C4E3FF"))+
+  geom_boxplot(#aes(fill=smp_type),
+                width=0.15,outlier.shape = NA)+
+  geom_jitter(position=position_jitter(0.1), aes(fill=smp_type,color=smp_type),size=2)+
+  scale_color_manual(values=c("#FB8D8D","#C0E1FF"))+
+  #scale_fill_manual(values =c("#FB4F4F", "#93CDFF"),guide = 'none')+
+  labs(y =paste0("Probability of originating"), x =" ", 
+       title = paste0("cell type ", i, "\n",
+                      "p = ", round(p.val, 3) ,"\n",
+                      "mean fold change GC/GP  ",round(mean_fold_change_GC,3),"\n",
+                      "mean fold change GP/GC  ",round(mean_fold_change_GP,3)))+
+  theme_classic()+ 
+  theme(
+     axis.text.x = element_text(size = 15),
+         axis.text.y = element_text(size = 15),
+         axis.text = element_text(size = 15,colour = "black"),
+         axis.title = element_text(size = 15,colour = "black"),
+        legend.position="none")
+# ggsave(plot,filename=paste0(fig_dir,"cell_type_",i,"figS18c_d_TOO_20250723.pdf"),width = 8,height = 6,dpi = 300)
+
+print(plot)
+plots[[i]] <- plot
+p_value[[i]] <- p.val
+}
+p_dataframe <- data.frame(tissue_type=names(p_value),
+                             p_val=unlist(p_value))
+p_dataframe$p_adjust <- p.adjust(p_dataframe$p_val,method = "BH")
+ print(p_dataframe)
+
+```
+## Figure S19 The same analysis process is shown in Figure S17
+
+## Technical 
+
+```{r}
+sessionInfo()
+```
+
+
