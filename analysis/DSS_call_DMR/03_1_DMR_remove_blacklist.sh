@@ -1,10 +1,10 @@
 #!/bin/bash
 
 ## 08 July 24 last modified 
-## because some region are in genome's blacklist, this may take some noise in our downstrem analysis on dmr 
-## so it is necessary to remove them 
+## because some regions are in genome's blacklist, this may take some noise in our downstream analysis on DMRs 
+## So it is necessary to remove them 
 ## The code refers to  https://www.biostars.org/p/184537/
-## the hg38 genome blacklist download from  https://github.com/Boyle-Lab/Blacklist
+## The hg38 genome blacklist was downloaded from  https://github.com/Boyle-Lab/Blacklist
 
 module load bedtools/2.31.0 
 

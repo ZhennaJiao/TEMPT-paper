@@ -1,11 +1,11 @@
- # Whole-genome methylation sequencing of extracellular vesicles in gastric cancer reveals molecular insights into intercellular communication
+ # Whole-genome methylation profiling of extracellular vesicle DNA in gastric cancer identifies intercellular communication features
  
  
  
  Authors: Bingqian Lin,<sup>1* </sup> Zhenna Jiao,<sup>2* </sup> Shouquan Dong,<sup>3* </sup> Weikai Yan,<sup>1 </sup> Jinting Jiang,<sup>1 </sup> Yanfang Du,<sup>1 </sup> Xiaocheng Weng,<sup>1† </sup> Hongling Wang,<sup>3† </sup> Zhiyuan Hu,<sup>2† </sup> Yibin Liu,<sup>1† </sup> Xiang Zhou <sup>1† </sup>  
  Affiliations:
  
- 1 College of Chemistry and Molecular Sciences, Taikang Center for Life and Medical Sciences, Wuhan University, Wuhan 430072, China.
+ 1 College of Chemistry and Molecular Sciences, State Key Laboratory of Metabolism and Regulation in Complex Organisms, Taikang Center for Life and Medical Sciences, Wuhan University, Wuhan 430072, China
  
  2 Medical Research Institute, Frontier Science Center for Immunology and Metabolism, Wuhan University, Wuhan 430072, China.
  

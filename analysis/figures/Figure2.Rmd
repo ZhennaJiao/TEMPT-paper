@@ -1,5 +1,5 @@
 ---
-title: "Fig2_codes"
+title: "Fig2 - codes"
 author: "Zhenna Jiao"
 date: "`r Sys.Date()`"
 output: html_document
@@ -25,18 +25,15 @@ library(RColorBrewer)
 fig_dir <- "/home/jiaozhenna/methylation/project/EM_seq/analysis/technical/figure/fig2/"
 proj <- "/home/jiaozhenna/methylation/project/EM_seq/data/metadata/"
 ```
-
 # Fig2B 
-
 ```{r}
-##import data
+## import data
 dat1 <- read_excel(paste0(proj,"ds_filter.xlsx"),sheet = "filter_lowqc_smp")
 readsta <- dat1[1:38,c(3,8,13)]
 colnames(readsta) <- c("sample","total_reads","map_reads_rate")
 readsta$total_reads <- as.numeric(readsta$total_reads)
 readsta$map_reads <- readsta$total_reads*readsta$map_reads_rate
-##do plot
-
+## do plots
 readsta$map_reads <- as.numeric(readsta$map_reads)
 
 ### "total_reads" and "map_reads" of all samples standard error and st
@@ -51,7 +48,7 @@ readsum <- data.frame(
   se = c(all_se_total_reads, all_se_map_reads)
 )
 
-### do barplot 
+### plot barplot 
 readsum$sample <- factor(readsum$sample,levels = c("Total Reads","Mapped Reads"))
 p1 <- ggplot(readsum, aes(x = sample, y = mean_reads)) +
       geom_bar(stat = "identity", fill = c("#86CDDE", "#9CC9E0"),width = 0.5) +
@@ -78,16 +75,16 @@ p1
 ```
 
 
-# Fig2C coverted cytosin spike_in analysis
+# Fig2C converted cytosine spike_in analysis
 
 ```{r,fig.width=4,fig.height=6}
-##import data
+## import data
 sp_in <- read_excel(paste0(proj,"ds_filter.xlsx"),sheet = "sp_in")
 sp_in$`sp_2kb_3-lambda` <- sp_in$`sp_2kb_3-lambda`*100
 sp_in$sp_lambda <- sp_in$sp_lambda *100
 sp_in$type <- factor(sp_in$type,levels = c("C","5mC"))
 
-##visulization for 2kb_3-lambda methylation conversion rate
+## visualization for 2kb_3-lambda methylation conversion rate
 p2 <- ggplot(sp_in ,aes(x=type,y=sp_in$`sp_2kb_3-lambda`,fill = type)) +
       geom_boxplot(outlier.shape = NA, color="#3d5da8", fill="white",lwd=1.5) +
       geom_jitter(position = position_jitter(0.2),size=2.5,color = "black", alpha=1) +
@@ -129,7 +126,7 @@ print(p3)
 ## import data
 cpg_data <- read_excel(paste0(proj,"ds_filter_update.xlsx"),sheet = "filter_sample_CpG_modified")
 cpg_data$smp_cpg_mod_rate <- cpg_data$smp_cpg_mod_rate*100
-cpg_data$stage <- factor(cpg_data$stage,levels = c("Control","Early Stage","Advanced Stage"))
+cpg_data$stage <- factor(cpg_data$stage, levels = c("Control", "Early Stage", "Advanced Stage"))
 
 
 wilcox_test <- compare_means(smp_cpg_mod_rate~stage,cpg_data,paired = F ,method = "wilcox.test",p.adjust.method = "BH")
@@ -137,7 +134,7 @@ wilcox_test <- compare_means(smp_cpg_mod_rate~stage,cpg_data,paired = F ,method 
 p_adjust <- wilcox_test$p.adj[1:2]
 
 
-## do boxplot 
+## make a boxplot 
 p4 <- ggplot(cpg_data, aes(x =stage, y = smp_cpg_mod_rate)) +
         geom_boxplot(aes(fill=stage),outlier.shape = NA,lwd=0.6,alpha=0.5)+
         geom_jitter(position=position_jitter(0.1), aes(colour=stage))+
@@ -147,7 +144,7 @@ p4 <- ggplot(cpg_data, aes(x =stage, y = smp_cpg_mod_rate)) +
         scale_fill_manual(values=c("#63A6D0","#F9A68A","#D34447"))+
         labs(x = "", y = "Mean genome modification (%)",lwd = 1.5)+
         geom_signif(comparisons = list( c("Control", "Early Stage"),
-                                        c("Control", "Advanced Stage")),
+                                        c("Control", "Advanced Stage") ),
         textsize = 6, p.signif = TRUE, annotations = c(paste0("p.adjust = ", round(p_adjust, 3))),
               y_position =c(76, 78) ,vjust = -0.2)+
         theme(

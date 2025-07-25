@@ -3,7 +3,7 @@
 module load bedtools/2.31.0
 
 
-## formate sample cov_result to dmr_bed  
+## format sample cov_result to dmr_bed  
 
 sample_list_1=("L15-3" "L15-4" "L15-1" "L15-2" "L15-5" "L15-7" "L29-2" "L29-6") ## bed_b_1
 sample_list_2=("L30-1" "L30-5" "L30-6" "L127-6") ## bed_b_2

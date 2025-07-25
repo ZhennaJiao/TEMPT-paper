@@ -1,6 +1,6 @@
 #### 2025-01-14 modified by Zhenna Jiao
-### call DMR for added sample 
-##use DSS to call DMR 
+### Call DMR for the added samples 
+## use DSS to call DMR 
 library(DSS)
 require(bsseq)
 library(data.table)
@@ -12,25 +12,19 @@ dat_met <- "~/methylation/project/EM_seq/20241125_data_reanalysis/metadata/sampl
 meta <- read_excel(dat_met,sheet = "filter_added_sample")
 ##
 print(meta$Sample)
-
 meta$Sample_name <- paste0(meta$Sample,"_",meta$Sample_ID)
 meta$type <- substr(meta$Sample,1,2)
-
 print(meta$Sample_name)
-
-
-
-## read call meth results and store in a list 
+## read methylation calling results and store in a list 
 proj_dir_1 <- "~/methylation/project/EM_seq/20241125_data_reanalysis/reprocessing/sample_30x_data_20241221/results/05_call_meth_data/"
 proj_dir_2 <- "~/methylation/project/EM_seq/20241125_data_reanalysis/reprocessing/smaple_30x_data_202412/results/04_call_meth_data/"
 proj_dir_3 <- "~/methylation/project/EM_seq/20241125_data_reanalysis/reprocessing/sample_30x_data_20250107/results/04_call_meth_data/"
 proj_dir_4 <- "~/methylation/project/EM_seq/20241125_data_reanalysis/reprocessing/sample_30x_data_20250121/results/04_call_meth_data/"
-#create a blank list to store the data frame 
+# Create a blank list to store the data frame 
 current_sample_data_list <- list()
 
 ## print("read bismark output and convert format...")
 for (i_sample in meta$Sample_name) {
-
   sample_prefix <- strsplit(i_sample, "_")[[1]][1]
   sample_suffix <- strsplit(i_sample, "_")[[1]][2]
 
@@ -88,7 +82,7 @@ saveRDS(current_sample_data_list,file =paste0(results_dir,"EMobject_filter_added
 
 
 
-##make group for samples 
+## Make the group for samples 
 gp_group <- c(meta$Sample[meta$type == "gp"])
 
 
@@ -111,7 +105,7 @@ dmlTest <- DMLtest(EMobject_fs,group1 =gp_group,group2 = gc_group,ncores=8,smoot
 saveRDS(dmlTest,paste0(results_dir,"dmlTest_filter_added_sample_20250213.rds"))
         
 
-##call dmr 
+## call dmr 
 
 print("call dmr delts=0.15")
 dmrs = callDMR(dmlTest, delta=0.15, p.threshold=0.05)

@@ -7,7 +7,6 @@ output:
     theme: architect
     highlight: github
 ---
-
 ## Load packages 
 
 ```{r load packages,include=TRUE}
@@ -17,30 +16,24 @@ library(data.table)
 library(RColorBrewer)
 library(data.table)
 ```
-
-## Create blank to store results.
+## Create a blank list to store results.
 
 ```{r }
 samples <-  c("L30-2_new","L121-1","L121-7","L29-1","L29-4_new","L29-7")
-
 proj_dir <- "~/methylation/project/EM_seq/20241125_data_reanalysis/reprocessing/smaple_30x_data_202412/results/08_spikein_call_meth/"
 results_list_non_meth_2kb_3 <- list()
 results_list_meth_2kb_3 <- list()
 results_list_non_meth_lambda <- list()
 results_list_meth_lambda <- list()
-
 kb_fig_dir <- "~/methylation/project/EM_seq/20241125_data_reanalysis/reprocessing/smaple_30x_data_202412/results/05_spikein_QC/fig_2kb_3/"
 
 dir.create(kb_fig_dir, recursive = TRUE)
 
 lambda_dir <- "~/methylation/project/EM_seq/20241125_data_reanalysis/reprocessing/smaple_30x_data_202412/results/05_spikein_QC/fig_lambda/"
 
-
 dir.create(lambda_dir, recursive = TRUE)
-
 ```
-
-## Calculate 2kb-3 coverage and methylation rate. 
+## Calculate 2 kb-3 coverage and methylation rate
 
 ```{r}
   for (i_sample in samples) {
@@ -49,16 +42,11 @@ dir.create(lambda_dir, recursive = TRUE)
                                          "Bs_methylation_percentage", "number_of_methylation_base", "number_of_unmethylation_base"))
     
     a <- b %>% filter(`chromosome_name` == "2kb_3|Unmodified")
-    
-   
+
     a$non_meth_rate <- a$number_of_unmethylation_base/(a$number_of_methylation_base+a$number_of_unmethylation_base)
-    
     t_2kb_3_non_meth_rate <- (sum(a$`number_of_unmethylation_base`) / sum(a$`number_of_methylation_base` + a$number_of_unmethylation_base)) 
-    
     t_2kb_3_meth_rate <- (sum(a$`number_of_methylation_base`) / sum(a$`number_of_unmethylation_base` + a$`number_of_methylation_base`)) 
-    
     png(filename = paste0(kb_fig_dir, "non_meth_rate_2kb_3_", basename(i_sample), ".png"),width = 800, height = 600)
-    
     par(mar = c(4, 4, 2, 2))
     
     plot(a$`end_coordinate`, a$non_meth_rate, xlab = "position", ylab = "non_meth_rate", type = "p",
@@ -75,19 +63,16 @@ dir.create(lambda_dir, recursive = TRUE)
     #calculate coverage
     a$sum <- a$`number_of_unmethylation_base` + a$`number_of_methylation_base`
     
-   
-    
-    # create ggplot2 
     p1 <- ggplot(a, aes(x = `end_coordinate`, y = sum)) +
       geom_line(color = "blue", size = 0.5) +
       labs(x = "position", y = "sum", title = paste("coverage_", basename(i_sample))) +
       theme_minimal() + 
       theme(axis.text = element_text(size = 10), axis.title = element_text(size = 12))
     print(p1)
-    # save plot
+    # save plots
     ggsave(file = paste0(kb_fig_dir,"coverage_2kb_3_", basename(i_sample), ".png"),plot = p1, width = 6, height = 4)
 
-    #create coverage and CpG methylation rate figure 
+    # make coverage and CpG methylation rate figures
     p2 <- ggplot(a, aes(x =non_meth_rate, y = sum)) +
       geom_point(color = "blue", size = 0.5) +
       geom_smooth(method = "lm", formula = 'y ~ x', se = FALSE, color = "red", span = 0.9) +
@@ -101,9 +86,7 @@ dir.create(lambda_dir, recursive = TRUE)
     results_list_meth_2kb_3[[i_sample]] <- t_2kb_3_meth_rate
   }
 ```
-
-
-## Write the 2kb_3 result in csv
+## Save the 2kb_3 result in csv
 
 ```{r}
 result_df <- data.frame(sample = names(results_list_non_meth_2kb_3), t_2kb_3_non_meth_percentage =
@@ -111,12 +94,8 @@ result_df <- data.frame(sample = names(results_list_non_meth_2kb_3), t_2kb_3_non
                         t_2kb_3_meth_percentage = unlist(results_list_meth_2kb_3))
 
 write.csv(result_df, file = paste0(kb_fig_dir,"2kb_3_meth_results.csv"), row.names = FALSE)
-
 ```
-
-
-
-## Calculate lambda.
+## Calculate lambda
 
 ```{r}
  for (i_sample in samples) {
@@ -124,23 +103,15 @@ write.csv(result_df, file = paste0(kb_fig_dir,"2kb_3_meth_results.csv"), row.nam
                            sep = '\t', header = FALSE, 
                            col.names = c("chromosome_name", "start_coordinate", "end_coordinate", 
                                          "Bs_methylation_percentage", "number_of_methylation_base", "number_of_unmethylation_base"))
-    
-    
     e <- d %>% filter(`chromosome_name` == "lambda") 
     
-    
     e$meth_rate <- e$`Bs_methylation_percentage`/100
-    
-    
-    
+
     t_lambda_meth_rate <- (sum(e$`number_of_methylation_base`) / sum(e$`number_of_unmethylation_base` +
                                                                        e$`number_of_methylation_base`)) * 100
     t_lambda_non_meth_rate <- (sum(e$`number_of_unmethylation_base`) / sum(e$`number_of_unmethylation_base` +
                                                                        e$`number_of_methylation_base`)) * 100
-    
-    png(filename = paste0(lambda_dir,"meth_rate_lambda_", basename(i_sample), ".png"), width = 800, height = 600)
-                        
-        
+    png(filename = paste0(lambda_dir,"meth_rate_lambda_", basename(i_sample), ".png"), width = 800, height = 600)                     
     par(mar = c(4, 4, 2, 2))
     
     plot(e$`end_coordinate`, e$meth_rate, xlab = "position", ylab = "meth_rate", type = "p",
@@ -149,13 +120,9 @@ write.csv(result_df, file = paste0(kb_fig_dir,"2kb_3_meth_results.csv"), row.nam
     legend(x="bottomright",legend =paste("%lambdameth_rate",round(t_lambda_meth_rate,2),"%\n"),bty = "n")
     dev.off()
     plot(e$`end_coordinate`, e$meth_rate, xlab = "position", ylab = "meth_rate", type = "p"
-         ,main = paste("meth_rate", basename(i_sample)),cex.main = 1, ylim = c(0.1, 1),col="blue",cex=0.5)
-    
-    
-    
-    #calculate coverage
+         ,main = paste("meth_rate", basename(i_sample)),cex.main = 1, ylim = c(0.1, 1),col="blue",cex=0.5) 
+    # calculate coverage
     e$sum <- e$`number_of_unmethylation_base` + e$`number_of_methylation_base`
-    
     p1 <- ggplot(e, aes(x = `end_coordinate`, y = sum)) +
       geom_line(color = "blue", size = 0.5) +
       labs(x = "position", y = "sum", title = paste("coverage", basename(i_sample))) +
@@ -176,24 +143,14 @@ write.csv(result_df, file = paste0(kb_fig_dir,"2kb_3_meth_results.csv"), row.nam
     results_list_non_meth_lambda[[i_sample]] <- t_lambda_non_meth_rate
     
   }
-
-
 ```
-
-
-## Write the lambda result in csv
+## Save the lambda result in csv format
 
 ```{r}
 result_lambda <- data.frame(sample = names(results_list_meth_lambda), lambda_meth_percentage = unlist(results_list_meth_lambda),
                             lambda_non_meth_percentage = unlist(results_list_non_meth_lambda))
-
 write.csv(result_lambda, file =paste0(lambda_dir,"lambda_methylation.csv"),row.names = FALSE)
 ```
-
-
-
-
-
 ## Technical
 
 ```{r}
