@@ -26,6 +26,7 @@ library(dplyr)
 library(reshape2)
 library(ggalluvial)
 ```
+
 ## Import the data 
 
 ```{r}
@@ -35,6 +36,7 @@ fig_proj <- "~/methylation/project/EM_seq/analysis/DMR_analysis/figures/fig4/"
 sc_dat_dir <- "~/methylation/project/EM_seq/analysis/DMR_analysis/data/filter_sample/scstage_dmr_change/"
 meta_df <- meta_df%>% mutate(sample_names=str_replace_all(sample_list,"-","."))
 ```
+
 ## Figure 4A Make a barplot for the top10 GO terms 
 
 ```{r,fig.width=20,fig.height=8}
@@ -80,12 +82,14 @@ plot <- ggplot(data, aes(x = reorder(Term, Combined_score), y = Combined_score))
 #          device = "pdf",width = 15, height = 6)
   
 ```
+
 ## Figure 4B
 
 ```{r,fig.width=15,fig.height=10}
 ## import data
-dat_dir <- "/home/jiaozhenna/methylation/project/EM_seq/analysis/DMR_analysis/code/gene_anlyais/"
+dat_dir <- "~/methylation/project/EM_seq/analysis/DMR_analysis/code/gene_anlyais/"
 go_gene_4 <- read.csv(paste0(dat_dir,"Go4_genes_meth.csv"))
+
 go4_gene_p <- go_gene_4[go_gene_4$p_adjust<0.05,]
 order_name <- c( "DPYSL3","RAPGEF2", 
                  "NLGN1", 
@@ -98,18 +102,22 @@ sorted_go_gene_4 <- go_gene_4 %>% arrange(Genes)
 sorted_go_gene_4[,4:8] <- lapply(sorted_go_gene_4[,4:8],as.character)
 sorted_go_gene_4$new_col <- apply(sorted_go_gene_4[,c(2,5,4,6)],1,function(x) paste(x,collapse = "_"))
 
-## Extract the data to make a heatmap
+## extract the data to generate a heatmap
 heatmap_dat <- sorted_go_gene_4[,c(2,10:47)]
 rownames(heatmap_dat) <- heatmap_dat$Genes
+
 gp_mat <- heatmap_dat[,2:18]%>%as.matrix()
 rownames(gp_mat) <- rownames(heatmap_dat)
 gc_mat <- heatmap_dat[,19:39]%>%as.matrix()
 rownames(gc_mat) <- rownames(heatmap_dat)
 ## annotation setting 
 type_colors <- c("GC" = "#FB8D8D", "GP" = "#C0E1FF")
-status_colors <- c("Control" = "#63A6D0", "Early Stage" = "#F9A68A", "Advanced Stage" = "#D34447")
+stage_colors <- c("Control" = "#63A6D0", "Early Stage" = "#F9A68A", "Advanced Stage" = "#D34447")
+
 gender_colors <- c("Male" = "#AACBFE", "Female" = "#DE8686")
+
 my_color=c("#4675FE","#F9F5C9","#FCA605")
+
 row_groups <- c(rep("GO:0031346;GO:0031345", 2),
                 rep("GO:0031346;GO:0034329",1),
                 rep("GO:0031346",6),
@@ -118,23 +126,24 @@ row_groups <- c(rep("GO:0031346;GO:0031345", 2),
                rep("GO:0031345",3))
 
 row_promoter <- c(rep("No",10),"Yes",rep("No",12),"Yes")%>%as.factor()
-ann_ht1 <- HeatmapAnnotation(
-                            Status=meta_df$sc_stage[1:17],
-                             Gender=meta_df$sc_gender[1:17],
+ann_ht1 <- HeatmapAnnotation(Gender=meta_df$sc_gender[1:17],
+                            Stage=meta_df$sc_stage[1:17],
                               Type=meta_df$sc_type[1:17],
                              annotation_name_side = "left",
                             annotation_name_gp = gpar(fontsize = 0),
-                               col=list(
-                                 Type = type_colors,
-                                  Status = status_colors,
-                                Gender = gender_colors))
-ann_ht2 <- HeatmapAnnotation(
-                            Status=meta_df$sc_stage[18:38],
-                            Gender=meta_df$sc_gender[18:38],
+                               col=list(Gender = gender_colors,
+                                        Stage = stage_colors,
+                                        Type = type_colors ))
+                                  
+                                 
+
+ann_ht2 <- HeatmapAnnotation(Gender=meta_df$sc_gender[18:38],
+                            Stage=meta_df$sc_stage[18:38],
+ 
                             Type=meta_df$sc_type[18:38],
-                            col=list(Type = type_colors,
-                                      Status = status_colors,
-                                      Gender = gender_colors),
+                            col=list(Gender = gender_colors,
+                                      Stage = stage_colors,
+                                      Type = type_colors),
                                       annotation_name_side = "right")
 
 row_promoter_col <- rowAnnotation(Promoter=row_promoter,col=list(Promoter=c("No"="#999999","Yes"="#F2F2F2")))
@@ -156,16 +165,14 @@ row_annots <- rowAnnotation(GO = row_groups,
                                at = c("GO:0034329", "GO:0031345", "GO:0031346", "GO:0045582", 
                                       "GO:0031346;GO:0034329", "GO:0031346;GO:0031345"),
                                labels = c("Cell Junction Assembly", 
-                                          "Positive Regulation Of T Cell Differentiation", 
-                                          "Positive Regulation Of Cell Projection Organization", 
                                           "Negative Regulation Of Cell Projection Organization", 
+                                          "Positive Regulation Of Cell Projection Organization", ## change
+                                          "Positive Regulation Of T Cell Differentiation",
                                           "Positive Regulation Of Cell Projection Organization;Cell Junction Assembly", 
                                           "Positive Regulation Of Cell Projection Organization;Negative Regulation Of Cell Projection Organization")
                              )
                            ))
-
-## Plot a heatmap
-# pdf(paste0(fig_proj,"fig4B_filter_dmr_smp_GO_top10_gene_heatmap_20240731.pdf"),width = 16,height = 10)
+## do heatmap
 heat_map_1 <- Heatmap(gp_mat,name="gp",
                       cluster_rows = T,
                       cluster_columns = T,
@@ -197,14 +204,11 @@ heat_map_2 <- Heatmap(gc_mat,name="gc",
                       height = unit(10,"cm"),
                       row_dend_side = "right")
 
+
 p <- heat_map_1+heat_map_2
 p
-# pdf(paste0(fig_dir,"fig4b_topGO_go_genes_20250327.pdf"),width = 16,height = 10)
-# draw(p, heatmap_legend_side = "bottom", annotation_legend_side = "bottom")
-# 
-# 
-# dev.off()
 ```
+
 ## Fig 4E  
 
 ```{r,fig.width=10,fig.height=8}
@@ -247,7 +251,8 @@ p3 <- ggplot(stack_dat,aes(fill = tissue, y = value, x = status,label = value)) 
               axis.title = element_text(size = 10,colour = "black"))
 print(p3)
 ```
-## technical
+
+## Technical
 
 ```{r}
 sessionInfo()

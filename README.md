@@ -46,7 +46,7 @@
  
  7. **Coverage Calculation**  
     Assess the coverage depth of the sequencing data.  
-    **Script:** `06_data_breath_coverage.sh`
+    **Script:** `06_data_breadth_coverage.sh`
  
  8. **Extracting Spike-In Controls**  
     Extract spike-in sequences from the mapped data.  

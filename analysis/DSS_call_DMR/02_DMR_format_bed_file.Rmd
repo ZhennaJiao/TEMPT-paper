@@ -15,10 +15,10 @@ library(magrittr)
 library(RColorBrewer)
 library(ComplexHeatmap)
 ```
-## Create DMR-region file. bed
-* Import the DMR and extract the top three columns and save as a bed file, which contains the chromosome number, start site, and end site  
+## Create the bed file 
+* Import the DMR file, extract the first three columns, and save them as a BED file with the chromosome number, start site, and end site  
 
-```{r cars}
+```{r}
 res_dir="~/methylation/project/EM_seq/20241125_data_reanalysis/Call_DMR_filter_add_sample_20250213/results/"
 added_sample_dmr_15 <- readRDS(paste0(res_dir,"callDMR_delta_015_filter_added_sample_20250213.rds"))
 write.csv(added_sample_dmr_15,paste0(res_dir,"DMR_validation_20sample_DSS_file_20250308.csv"))

@@ -69,10 +69,10 @@ dir.create(lambda_dir, recursive = TRUE)
       theme_minimal() + 
       theme(axis.text = element_text(size = 10), axis.title = element_text(size = 12))
     print(p1)
-    # save plots
+    # save iamges as PNG format
     ggsave(file = paste0(kb_fig_dir,"coverage_2kb_3_", basename(i_sample), ".png"),plot = p1, width = 6, height = 4)
 
-    # make coverage and CpG methylation rate figures
+    # Generate figures for coverage and CpG methylation rates 
     p2 <- ggplot(a, aes(x =non_meth_rate, y = sum)) +
       geom_point(color = "blue", size = 0.5) +
       geom_smooth(method = "lm", formula = 'y ~ x', se = FALSE, color = "red", span = 0.9) +
@@ -95,7 +95,7 @@ result_df <- data.frame(sample = names(results_list_non_meth_2kb_3), t_2kb_3_non
 
 write.csv(result_df, file = paste0(kb_fig_dir,"2kb_3_meth_results.csv"), row.names = FALSE)
 ```
-## Calculate lambda
+## Calculate lambda DNA methylation level 
 
 ```{r}
  for (i_sample in samples) {

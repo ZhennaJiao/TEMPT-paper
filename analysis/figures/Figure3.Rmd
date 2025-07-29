@@ -4,6 +4,7 @@ author: "Zhenna Jiao"
 date: "2024-06-03"
 output: html_document
 ---
+# Load packages
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
@@ -37,16 +38,18 @@ library(ggbiplot)
 library(corrplot)
 library(ggrepel)
 ```
+
 ## Import data
 
-```{r cars}
+```{r}
 dat_dir <- "~/methylation/project/EM_seq/analysis/DMR_analysis/data/ref_dmr_ann_data/"
 fig_dir <- "~/methylation/project/EM_seq/analysis/DMR_analysis/figures/fig3.plot/"
 meth_dmr <-  read.csv(paste0(dat_dir,"fil_dmr_meth_gene.csv"))
 meta_df <- readRDS("~/methylation/project/EM_seq/data/metadata/meta_df.rds")
 meta_df <- meta_df%>% mutate(sample_names=str_replace_all(sample_list,"-","."))
 ```
-## Fig 3A Plot a heatmap for the correlation between GP and GC on DMRs regions
+
+## Fig3A Plot a heatmap for the correlation between GP and GC on DMRs
 
 ```{r,fig.width=14,fig.height=10}
 ## Import data
@@ -85,7 +88,8 @@ pheatmap::pheatmap(DMR_cor_df_keepna,cluster_rows = T ,
 
 # dev.off()
 ```
-## Fig 3B  Calculate PCA for DMR between GC and GP based on the DMR region's methylation level (the matrix removes missing)
+
+## Fig3B  PCA for DMR between GC and GP based on the DMRs' methylation level (the matrix have already removed missing values)
 
 ```{r,fig.width=10,fig.height=8}
 # Import data
@@ -99,9 +103,8 @@ colnames(tr_data) <- rownames(data)
 tr_data <- as.data.frame(tr_data)
 tr_data$sample_state <- meta_df$sc_type %>% as.factor()
 tr_data$sample_stage <- meta_df$sc_stage  %>% as.factor()
-# calculate PCA
+#PCA
 tr.pca_all <- prcomp(tr_data[,1:28])
-# do plot for pc1 and pc2
 df1 <- tr.pca_all$x
 pc_one <- as.data.frame(df1,tr_data$sample_state)
 pc_one$Type <- tr_data$sample_state
@@ -126,7 +129,8 @@ p2<-ggplot(data = pc_one,aes(x=PC1,y=PC2,color=Type))+
  # ggsave(paste0(fig_dir,"pca_smp_dmr_removena.pdf"),plot = p2,width = 8,height = 5,dpi = 300)
 print(p2)
 ```
-## Fig 3C  Plot a lollipop for the annotated gene elements
+
+## Fig3C  Plot a lollipop for the annotated gene elements
 
 ```{r}
 proj_dir <- "~/methylation/project/EM_seq/analysis/DMR_analysis/result/annotation_dmr/"
@@ -148,7 +152,8 @@ p2 <- ggplot(dat_smp, aes(y = elments, x = logp)) +
 # ggsave(paste0(fig_dir,"lolipop_smp_dmr_20240806.pdf"),plot = p2,width = 6,height = 4,dpi = 300)
 print(p2)
 ```
-## Fig 3D AUC score
+
+## Fig3D AUC score
 
 ```{r}
 samples <-  meta_df$sample_list
@@ -212,7 +217,7 @@ res_RF_regression_list <- list()
         return(res_RF_regession)
         cat("complete round",i ,"\n")
  }
- 
+
 ## Define a function
  
  pred_dat_list <- list()
@@ -285,8 +290,8 @@ print(p1)
           axis.line.x = element_line(size = 1,linetype = 1,colour = "black"),
           axis.line.y = element_line(size = 1,linetype = 1,colour = "black"),
           axis.title = element_text(size = 15,colour = "black"))
-  ggsave(plot = p3,filename = paste0(fig_dir,"RandomForest_ROCplot_20240827.pdf"),
-        width = 8,height = 6,dpi = 300)
+  # ggsave(plot = p3,filename = paste0(fig_dir,"RandomForest_ROCplot_20240827.pdf"),
+  #       width = 8,height = 6,dpi = 300)
   print(p3)
 
  }
@@ -365,7 +370,6 @@ for (i in 1:length(folds)){
    }
       dmr_meth <- na.omit(dmr_meth_matrix)
       dmr_cov <- na.omit(dmr_cov_matrix)
-      ## filter by coverage threshold value is >=5,>=10,>=15,>=20 to get the sample meth_matrix 
       rownames(dmr_cov) <- dmr_cov$chr
       rownames(dmr_meth) <- dmr_meth$chr
       val=15
@@ -385,7 +389,8 @@ DOPLOT(folds = folds,
        label = "sc")
 PlotForAllFold(list =res_RF_regression_list,folds = folds,all_sample = meta$samples,label="sc")
 ```
-## Fig 3E AUC score for the independent validation cohort 
+
+## Fig3E AUC score for the independent validation cohort 
 
 ```{r}
 ## import data 
@@ -582,6 +587,7 @@ DOPLOT(folds = folds,
        all_sample = meta$Sample_ID,
        label = "GC")
 ```
+
 ## Fig 3F Plot a heatmap for the top 50 genes
 
 ```{r,fig.width=16,fig.height=10}
@@ -595,7 +601,7 @@ h_data <- h_data[,-1]%>%as.matrix()
 meth_dmr$p_adjust <- as.numeric(meth_dmr$p_adjust)
 p_data <- meth_dmr[meth_dmr$p_adjust< 0.05,]
 
-## Oreder the dataframe 
+## Order the dataframe 
 p_data <- p_data[order(p_data$p_adjust),]
 h_data <- p_data[1:50,]
 h_data[,c(6,2,3,4)] <- lapply(h_data[,c(6,2,3,4)],as.character)
@@ -609,7 +615,7 @@ rownames(top20_30_gene_dat) <- top20_30_gene_dat$Genes
 top20_gene_dat <- top20_gene_dat[,2:39]%>%as.matrix()
 top20_30_gene_dat <- top20_30_gene_dat[,2:39]%>%as.matrix()
 
-## Divided the matrix based on the gender 
+## Divide the matrix based on the sex 
 male_samples <- meta_df %>%
   filter(sc_gender == "Male") %>%
   pull(sample_names)
@@ -637,7 +643,7 @@ my_color=c("#4675FE","#F9F5C9","#FCA605")
 male_df <- meta_df[meta_df$sample_names %in%male_samples,]
 female_df <- meta_df[meta_df$sample_names %in%female_samples,]
 
-##-------------- annotation for the heatmap--------------------------------
+##-------------- annotation of the heatmap--------------------------------
 ann_male <- HeatmapAnnotation(
                             Status=male_df$sc_stage,
                              Gender=male_df$sc_gender,
@@ -766,26 +772,32 @@ Heatmap(top20_30_gene_dat,
                      show_heatmap_legend = TRUE,
                      border_gp = gpar(col = "NA"))
 ```
-## Figure 3G  Plot a violin plot for all associated DMR regions between GC and GP genes.
+
+## Figure3G  Plot a violin plot for all associated DMRs between GC and GP.
 
 ```{r,echo=FALSE}
-## Import data
+## import data
 sample_list <- meta_df$sample_list
 dat_proj <- "~/methylation/project/EM_seq/analysis/DMR_analysis/data/filter_sample/dmr_file_delta0.15/"
+#fig_dir <- "~/methylation/project/EM_seq/TEMPT-paper-codes/DMR_meth_fig/"
 ## change data format
 sample_DMR_meth <- read.table(paste0(dat_proj,"dmrs_region_list.bed"),col.names = "chr_region")
 sample_DMR_cov <- read.table(paste0(dat_proj,"dmrs_region_list.bed"),col.names = "chr_region")
 
 for (i_sample in sample_list){
   a <- read.table(paste0(dat_proj,i_sample,"_dmr_meth.bed"),col.name = c("chromosome","start","end","mod","unmod","meth_level"))
+
  sample_DMR_meth[[i_sample]] <- a$meth_level
  sample_DMR_cov[[i_sample]] <- a$mod+a$unmod
 }
+
 dmr_ann <- read.csv("~/methylation/project/EM_seq/analysis/DMR_analysis/code/gene_anlyais/meth_merge_change.csv")
 ## change data format
 dmr_ann[, c(1:5)] <- lapply(dmr_ann[,c(1:5)], as.character)
 dmr_ann$gene_region <-  apply(dmr_ann[, c(1:5)], 1, function(x) paste(x, collapse = "_"))
+
 dmr_ann$chr_region <- apply(dmr_ann[, c(1:3)], 1, function(x) paste(x, collapse = "_"))
+
 dmr_ann_df <- dmr_ann[,c(45,44,6:43)]
 ## merge smp_meth_data into gene annotation
 merge_smp_meth_ann <- merge(dmr_ann_df,sample_DMR_meth,by="chr_region")
@@ -813,12 +825,9 @@ rownames(tr_data_co) <- colnames(data_cov)
 colnames(tr_data_co) <- rownames(data_cov)
 tr_data_cov<- as.data.frame(tr_data_co)
 
-## Write a loop to do a plot 
 common_cols <- intersect(names(tr_data_cov), names(tr_data_meth))
 count=0
-p_adjust <- list()
 p_value <- list()
-## 
 for (col in common_cols) {
   df <- data.frame(x = tr_data_cov[[col]], y = tr_data_meth[[col]]) 
   df$status <- meta_df$sc_type%>%as.factor()
@@ -830,15 +839,17 @@ for (col in common_cols) {
     p.value<- wilcox_test$p.value
     p_value[[col]] <- p.value
     
-  if(!is.na(p_value)&&p_value< 0.05&&length(p_value)!=0){ 
+  if(!is.na(p.value)&&p.value< 0.05 && length(p.value)!=0){ 
         p1 <- ggplot(df, aes(x = status, y = y)) +
               geom_violin(aes(fill=status,alpha=1),scale = "width") +
               scale_fill_manual(values =c("#FC9595", "#C4E3FF"))+
               geom_boxplot(aes(fill=status),
                             outlier.shape = NA,lwd=0.4,width=0.05)+
               scale_fill_manual(values =c("#FB4F4F", "#93CDFF"),guide = 'none')+
+              geom_jitter(aes(fill = status),
+                          position = position_jitterdodge(jitter.width = 0.3, dodge.width = 0.8),size = 3, shape = 21,)+
               labs(y ="Methylation level", x = paste("y_", col), 
-                   title = paste0("p = ", round(p_value, 10)))+
+                   title = paste0("p = ", round(p.value, 10)))+
               theme_classic()+
               theme(axis.text.x = element_text(size = 15),
                     axis.text.y = element_text(size = 15),
@@ -847,16 +858,18 @@ for (col in common_cols) {
                     axis.line.y = element_line(size = 1,linetype = 1,colour = "black"),
                     axis.title = element_text(size = 15,colour = "black"),
                     legend.position="none")
-        # ggsave(plot = p1,filename =paste0(fig_proj,"fig4C_gene_violin_plot_20240902/","meth_",
-        #         col,"_violin_plot_20240902.pdf"),width = 6,height = 4,dpi = 300
+        
+        #ggsave(plot = p1,filename =paste0(fig_dir,"meth_",col,"_violin_plot_20250721.pdf"),width = 6,height = 4,dpi = 300)
+        
         print(p1)
          }else{
              print(paste0(col,"_wilcox p_value less than 0.05,and the p is ",p_value))
             count=count+1 }
-          print(count)
+          
+    print(count)
  }
-
 ```
+
 ## Fig 3I
 
 ```{r}
@@ -880,7 +893,8 @@ venn.plot1 <- venn.diagram(dmr_list[2:3],NULL,
 grid.draw(venn.plot1)
 # dev.off()      
 ```
-## technical
+
+## Technical
 
 ```{r}
 sessionInfo()

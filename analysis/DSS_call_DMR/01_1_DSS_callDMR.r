@@ -15,7 +15,7 @@ print(meta$Sample)
 meta$Sample_name <- paste0(meta$Sample,"_",meta$Sample_ID)
 meta$type <- substr(meta$Sample,1,2)
 print(meta$Sample_name)
-## read methylation calling results and store in a list 
+## read methylation calling results and store them in a list 
 proj_dir_1 <- "~/methylation/project/EM_seq/20241125_data_reanalysis/reprocessing/sample_30x_data_20241221/results/05_call_meth_data/"
 proj_dir_2 <- "~/methylation/project/EM_seq/20241125_data_reanalysis/reprocessing/smaple_30x_data_202412/results/04_call_meth_data/"
 proj_dir_3 <- "~/methylation/project/EM_seq/20241125_data_reanalysis/reprocessing/sample_30x_data_20250107/results/04_call_meth_data/"
@@ -34,7 +34,7 @@ for (i_sample in meta$Sample_name) {
   file_path_4 <- paste0(proj_dir_4,sample_suffix,"_L2_1_val_1_bismark_bt2_pe.deduplicated.bismark.cov.gz")
   
   df_tmp <- NULL
-  ## check the different file path
+  ## check the different file paths
   if(file.exists(file_path_1)){
     df_tmp <- data.table::fread(file_path_1,sep = '\t', header = FALSE,  # import the bismark coverage data.
                                 col.names = c("chr", "start_coordinate", "pos", "Bs_methylation_percentage", "X", "number_of_unmethylation_base"))
@@ -82,7 +82,7 @@ saveRDS(current_sample_data_list,file =paste0(results_dir,"EMobject_filter_added
 
 
 
-## Make the group for samples 
+## Assign samples to groups 
 gp_group <- c(meta$Sample[meta$type == "gp"])
 
 
@@ -105,7 +105,7 @@ dmlTest <- DMLtest(EMobject_fs,group1 =gp_group,group2 = gc_group,ncores=8,smoot
 saveRDS(dmlTest,paste0(results_dir,"dmlTest_filter_added_sample_20250213.rds"))
         
 
-## call dmr 
+## call dmrs
 
 print("call dmr delts=0.15")
 dmrs = callDMR(dmlTest, delta=0.15, p.threshold=0.05)
